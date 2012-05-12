@@ -22,6 +22,21 @@ func IsExactly(candidate []int, value int) bool {
     return len(candidate) == 1 && candidate[0] == value
 }
 
+func HasAllOf(candidate []int, values []int) bool {
+    for _, value := range values {
+        bool found = false
+        for _, candidateValue := range candidate {
+            if candidateValue == value {
+                found = true
+            }
+        }
+        if !found {
+            return false
+        }
+    }
+    return true
+}
+
 func TestZeroSizedBoard(t *testing.T) {
     emptyBoard := []int {}
     if len(Solution(emptyBoard)) != 0 {
@@ -68,7 +83,6 @@ func TestFindsMissingNumbersInList2(t *testing.T) {
     }
 }
 
-/*
 func TestFindsMultipleMissingNumbersInLongerList(t *testing.T) {
     input := []int {1, 0, 0}
     result := Solution(input)
@@ -84,4 +98,3 @@ func TestFindsMultipleMissingNumbersInLongerList(t *testing.T) {
         t.Errorf("Undecidable value should have all possible values. Expected {2,3}, but was %v\n", result[2])
     }
 }
-*/
