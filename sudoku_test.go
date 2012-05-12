@@ -4,9 +4,9 @@ import (
     "testing"
 )
 
-func GetMissingValue(board []int) int {
+func GetMissingValue(board []int) []int {
     missing := make([]int, len(board))
-    missingValue := 0
+    missingValue := make([]int, 0)
     for _, v := range board {
         if v > 0 {
             missing[v-1] = v
@@ -14,7 +14,7 @@ func GetMissingValue(board []int) int {
     }
     for i := range board {
         if missing[i] == 0 {
-            missingValue = i+1
+            missingValue = append(missingValue, i+1)
         }
     }
     return missingValue
@@ -26,9 +26,10 @@ func Solution(board []int) [][]int {
     result := make([][]int, len(board))
     for i, v := range board {
         if v == 0 {
-            v = missingValue
+            result[i] = missingValue
+        } else {
+            result[i] = []int {v}
         }
-        result[i] = []int {v}
     }
     return result
 }
@@ -111,7 +112,6 @@ func TestFindsMissingNumberInSize3List(t *testing.T) {
 
 }
 
-/*
 func TestFindsMultipleMissingNumbersInLongerList(t *testing.T) {
     input := []int {1, 0, 0}
     result := Solution(input)
@@ -127,4 +127,3 @@ func TestFindsMultipleMissingNumbersInLongerList(t *testing.T) {
         t.Errorf("Undecidable value should have all possible values. Expected {2,3}, but was %v\n", result[2])
     }
 }
-*/
