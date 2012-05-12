@@ -5,8 +5,10 @@ import (
 )
 
 func Solution(board []int) []int {
-    if len(board) > 1 {
-        board[1] = 2
+    for i := range board {
+        if board[i] == 0 {
+            board[i] = 2
+        }
     }
     return board
 }
