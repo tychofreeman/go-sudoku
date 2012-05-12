@@ -22,14 +22,12 @@ func GetMissingValue(board []int) int {
 
 func Solution(board []int) [][]int {
     missingValue := GetMissingValue(board)
-    for i := range board {
-        if board[i] == 0 {
-            board[i] = missingValue
-        }
-    }
 
     result := make([][]int, len(board))
     for i, v := range board {
+        if v == 0 {
+            v = missingValue
+        }
         result[i] = []int {v}
     }
     return result
