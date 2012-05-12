@@ -5,7 +5,9 @@ import (
 )
 
 func Solution(board []int) []int {
-    board[1] = 2
+    if len(board) > 1 {
+        board[1] = 2
+    }
     return board
 }
 
@@ -38,6 +40,6 @@ func TestFindsMissingNumbersInList(t *testing.T) {
     }
 
     if result[1] != 2 {
-/bin/bash: :w: command not found
+        t.Errorf("Unknown value was not found. Expected 2, but was %v\n", result[1])
     }
 }
