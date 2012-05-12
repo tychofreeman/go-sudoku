@@ -5,6 +5,7 @@ import (
 )
 
 func Solution(board []int) []int {
+    board[1] = 2
     return board
 }
 
