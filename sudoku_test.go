@@ -27,3 +27,16 @@ func TestOneSizedBoard(t *testing.T) {
         t.Errorf("Single value in result should be 1, but was %v\n", result[0])
     }
 }
+
+func TestFindsMissingNumbersInList(t *testing.T) {
+    input := []int {1, 0}
+    result := FindAll(input)
+
+    if result[0] != 1 {
+        t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[0])
+    }
+
+    if result[1] != 2 {
+        t.Errorf("Unknown value was not found. Expected 2, but was %v\n", result[0])
+    }
+}
