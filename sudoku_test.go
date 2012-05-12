@@ -4,8 +4,7 @@ import (
     "testing"
 )
 
-func Solution(board []int) [][]int {
-    
+func GetMissingValue(board []int) int {
     missing := make([]int, len(board))
     missingValue := 0
     for _, v := range board {
@@ -18,6 +17,11 @@ func Solution(board []int) [][]int {
             missingValue = i+1
         }
     }
+    return missingValue
+}
+
+func Solution(board []int) [][]int {
+    missingValue := GetMissingValue(board)
     for i := range board {
         if board[i] == 0 {
             board[i] = missingValue
