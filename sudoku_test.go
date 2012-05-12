@@ -43,3 +43,16 @@ func TestFindsMissingNumbersInList(t *testing.T) {
         t.Errorf("Unknown value was not found. Expected 2, but was %v\n", result[1])
     }
 }
+
+func TestFindsMissingNumbersInList2(t *testing.T) {
+    input := []int {0, 1}
+    result := Solution(input)
+
+    if result[1] != 1 {
+        t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[1])
+    }
+
+    if result[0] != 2 {
+        t.Errorf("Unkonwn value was not found. Expected 2, but was %v\n", result[1])
+    }
+}
