@@ -5,9 +5,22 @@ import (
 )
 
 func Solution(board []int) [][]int {
+    
+    missing := make([]int, len(board))
+    missingValue := 0
+    for _, v := range board {
+        if v > 0 {
+            missing[v-1] = v
+        }
+    }
+    for i := range board {
+        if missing[i] == 0 {
+            missingValue = i+1
+        }
+    }
     for i := range board {
         if board[i] == 0 {
-            board[i] = 2
+            board[i] = missingValue
         }
     }
 
@@ -81,6 +94,19 @@ func TestFindsMissingNumbersInList2(t *testing.T) {
     if !IsExactly(result[0], 2) {
         t.Errorf("Unkonwn value was not found. Expected 2, but was %v\n", result[1])
     }
+}
+
+func TestFindsMissingNumberInSize3List(t *testing.T) {
+    input := []int {1, 2, 0}
+    result := Solution(input)
+    if !IsExactly(result[0], 1) || !IsExactly(result[1], 2) {
+        t.Errorf("Known values should not be changed.\n")
+    }
+
+    if !IsExactly(result[2], 3) {
+        t.Errorf("Unkonwn value was not found. Expected 3, but was %v\n", result[2])
+    }
+
 }
 
 /*
