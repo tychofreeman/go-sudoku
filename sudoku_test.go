@@ -24,7 +24,6 @@ func MapMissingValues(board [][]int) []int {
 func Solution(board [][]int) [][]int {
     notFound := MapMissingValues(board)
 
-
     missingValue := make([][]int, len(board))
     for i := range board {
         missingValue[i] = make([]int, 0)
@@ -37,8 +36,17 @@ func Solution(board [][]int) [][]int {
     return missingValue
 }
 
-func IsExactly(candidate []int, value int) bool {
-    return len(candidate) == 1 && candidate[0] == value
+func IsExactly(candidate []int, value []int) bool {
+    if len(candidate) == len(value) {
+        for i := range candidate {
+            if candidate[i] != value[i] {
+                return false
+            }
+        }
+    } else {
+        return false
+    }
+    return true
 }
 
 func HasAllOf(candidate []int, values []int) bool {
@@ -71,7 +79,7 @@ func TestOneSizedBoard(t *testing.T) {
         t.Errorf("Length should be 1, but was %v\n", result)
     }
 
-    if !IsExactly(result[0], 1) {
+    if !IsExactly(result[0], []int{1}) {
         t.Errorf("Single value in result should be 1, but was %v\n", result[0])
     }
 }
@@ -80,11 +88,11 @@ func TestFindsMissingNumbersInList(t *testing.T) {
     input := [][]int {[]int{1}, []int{}}
     result := Solution(input)
 
-    if !IsExactly(result[0], 1) {
+    if !IsExactly(result[0], []int{1}) {
         t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[0])
     }
 
-    if !IsExactly(result[1], 2) {
+    if !IsExactly(result[1], []int{2}) {
         t.Errorf("Unknown value was not found. Expected 2, but was %v\n", result[1])
     }
 }
@@ -93,11 +101,11 @@ func TestFindsMissingNumbersInList2(t *testing.T) {
     input := [][]int {[]int{}, []int{1}}
     result := Solution(input)
 
-    if !IsExactly(result[1], 1) {
+    if !IsExactly(result[1], []int{1}) {
         t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[1])
     }
 
-    if !IsExactly(result[0], 2) {
+    if !IsExactly(result[0], []int{2}) {
         t.Errorf("Unknown value was not found. Expected 2, but was %v\n", result[0])
     }
 }
@@ -105,11 +113,11 @@ func TestFindsMissingNumbersInList2(t *testing.T) {
 func TestFindsMissingNumberInSize3List(t *testing.T) {
     input := [][]int {[]int{1}, []int{2}, []int{}}
     result := Solution(input)
-    if !IsExactly(result[0], 1) || !IsExactly(result[1], 2) {
+    if !IsExactly(result[0], []int{1}) || !IsExactly(result[1], []int{2}) {
         t.Errorf("Known values should not be changed.\n")
     }
 
-    if !IsExactly(result[2], 3) {
+    if !IsExactly(result[2], []int{3}) {
         t.Errorf("Unkonwn value was not found. Expected 3, but was %v\n", result[2])
     }
 
@@ -119,7 +127,7 @@ func TestFindsMultipleMissingNumbersInLongerList(t *testing.T) {
     input := [][]int {[]int{1}, []int{}, []int{}}
     result := Solution(input)
 
-    if !IsExactly(result[0], 1) {
+    if !IsExactly(result[0], []int{1}) {
         t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[0])
     }
 
@@ -135,7 +143,7 @@ func TestReducesMissingNumbersIfNumIsPresent(t *testing.T) {
     input := [][]int {[]int{1}, []int{2,1,3}, []int{2,1,3}}
     result := Solution(input)
 
-    if !IsExactly(result[0], 1) {
+    if !IsExactly(result[0], []int{1}) {
         t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[0])
     }
 
@@ -144,5 +152,13 @@ func TestReducesMissingNumbersIfNumIsPresent(t *testing.T) {
     }
     if !HasAllOf(result[1], []int {2,3}) {
         t.Errorf("Undecidable value should have all possible values. Expected {2,3}, but was %v\n", result[2])
+    }
+}
+
+func TestDoesNotIntroduceNewNumbers(t *testing.T) {
+    input := [][]int {[]int{1}, []int{2,3}, []int{2,3,4}, []int {2,3,4}}
+    result := Solution(input)
+    if !IsExactly(result[1], []int{2,3}) {
+        t.Errorf("Added some new numbers when it should not have. Expected []int{2,3}, but was %v\n", result[1])
     }
 }
