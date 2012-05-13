@@ -7,7 +7,7 @@ import (
 func MapMissingValues(board [][]int) []int {
     found := make([]int, len(board))
     for _, v := range board {
-        if len(v) >= 1 {
+        if len(v) == 1 {
             found[v[0]-1] = v[0]
         }
     }
@@ -27,7 +27,7 @@ func Solution(board [][]int) [][]int {
     missingValue := make([][]int, len(board))
     for i := range board {
         missingValue[i] = make([]int, 0)
-        if len(board[i]) == 0 {
+        if len(board[i]) != 1 {
             missingValue[i] = notFound
         } else {
             missingValue[i] = board[i]
