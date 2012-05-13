@@ -21,6 +21,21 @@ func MapMissingValues(board [][]int) []int {
     return notFound
 }
 
+func union(prevCalcd, remaining []int) []int {
+    if len(prevCalcd) > 0 {
+        rtn := make([]int, 0)
+        for _, pv := range prevCalcd {
+            for _, rv := range remaining {
+                if pv == rv {
+                    rtn = append(rtn, pv)
+                }
+            }
+        }
+        return rtn
+    }
+    return remaining
+}
+
 func Solution(board [][]int) [][]int {
     notFound := MapMissingValues(board)
 
@@ -28,7 +43,7 @@ func Solution(board [][]int) [][]int {
     for i := range board {
         missingValue[i] = make([]int, 0)
         if len(board[i]) != 1 {
-            missingValue[i] = notFound
+            missingValue[i] = union(board[i], notFound)
         } else {
             missingValue[i] = board[i]
         }
