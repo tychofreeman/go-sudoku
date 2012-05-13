@@ -4,7 +4,7 @@ import (
     "testing"
 )
 
-func MapMissingValues(board [][]int) [][]int {
+func MapMissingValues(board [][]int) []int {
     found := make([]int, len(board))
     for _, v := range board {
         if len(v) >= 1 {
@@ -18,6 +18,12 @@ func MapMissingValues(board [][]int) [][]int {
             notFound = append(notFound, i + 1)
         }
     }
+    return notFound
+}
+
+func Solution(board [][]int) [][]int {
+    notFound := MapMissingValues(board)
+
 
     missingValue := make([][]int, len(board))
     for i := range board {
@@ -29,16 +35,6 @@ func MapMissingValues(board [][]int) [][]int {
         }
     }
     return missingValue
-}
-
-func Solution(board [][]int) [][]int {
-    missingValue := MapMissingValues(board)
-
-    result := make([][]int, len(board))
-    for i, v := range board {
-        result[i] = missingValue[i]
-    }
-    return result
 }
 
 func IsExactly(candidate []int, value int) bool {
