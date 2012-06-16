@@ -2,6 +2,7 @@ package sudoku
 
 import (
     "testing"
+    "math"
 )
 
 func MapMissingValues(board [][]int) []int {
@@ -261,6 +262,108 @@ func columnsOf(board [][][]int) [][][]int {
     return output
 }
 
+func squaresOf(board [][][]int) [][][]int {
+    output := make([][][]int, len(board))
+    for i := range output {
+        output[i] = make([][]int, len(board))
+    }
+    coords := coordsMapForBoardOfLength(len(board))
+    for i := range board {
+        for j := range board[i] {
+            outI, outJ := coords(i, j)
+            output[outI][outJ] = board[i][j]
+        }
+    }
+    return output
+}
+
+func coordsMapForBoardOfLength(length int) (func(int,int) (int,int)) {
+    fLen := float64(length)
+    squareSize := int(math.Floor(math.Sqrt(fLen)))
+    if squareSize * squareSize != length {
+        return func(i,j int) (int,int) {
+            return 0,0
+        }
+    }
+    return func(i, j int) (int, int) {
+        return ((i/squareSize)*squareSize + j/squareSize), (j%squareSize + (i%squareSize)*squareSize)
+    }
+}
+
+
+func TestDegenerateCoords3By3MapTo1By1Squares(t *testing.T) {
+    data := [][]int{
+        []int{0,0,0,0},
+        []int{0,1,0,0},
+        []int{1,0,0,0},
+        []int{2,2,0,0},
+    }
+
+    f := coordsMapForBoardOfLength(3)
+    for _, datum := range data {
+        i, j := f(datum[0], datum[1])
+        if i != datum[2] || j != datum[3] {
+            t.Errorf("For input %v,%v, expected %v,%v but got %v,%v\n", datum[0],datum[1], datum[2], datum[3], i, j)
+        }
+    }
+}
+
+func TestCoords9By9MapTo3By3Squares(t *testing.T) {
+    data := [][]int{
+        []int{0,0,0,0},
+        []int{1,0,0,3},
+        []int{1,1,0,4},
+        []int{2,2,0,8},
+        []int{0,6,2,0},
+        []int{0,7,2,1},
+        []int{0,8,2,2},
+        []int{1,6,2,3},
+        []int{2,6,2,6},
+        []int{3,0,3,0},
+        []int{3,2,3,2},
+        []int{4,0,3,3},
+        []int{3,6,5,0},
+        []int{4,6,5,3},
+        []int{5,8,5,8},
+    }
+
+    f := coordsMapForBoardOfLength(9)
+    for _, datum := range data {
+        i, j := f(datum[0], datum[1])
+        if i != datum[2] || j != datum[3] {
+            t.Errorf("For input %v,%v, expected %v,%v but got %v,%v\n", datum[0],datum[1], datum[2], datum[3], i, j)
+        }
+    }
+}
+
+func _TestSauaresOf81CellBoardAre3X3Nondrants(t *testing.T) {
+    input := [][][]int{
+        [][]int{[]int{1},[]int{1},[]int{1},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2}},
+        [][]int{[]int{1},[]int{1},[]int{1},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2}},
+        [][]int{[]int{1},[]int{1},[]int{1},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2}},
+        [][]int{[]int{4},[]int{4},[]int{4},[]int{5},[]int{5},[]int{5},[]int{6},[]int{6},[]int{6}},
+        [][]int{[]int{4},[]int{4},[]int{4},[]int{5},[]int{5},[]int{5},[]int{6},[]int{6},[]int{6}},
+        [][]int{[]int{4},[]int{4},[]int{4},[]int{5},[]int{5},[]int{5},[]int{6},[]int{6},[]int{6}},
+        [][]int{[]int{7},[]int{7},[]int{7},[]int{8},[]int{8},[]int{8},[]int{9},[]int{9},[]int{9}},
+        [][]int{[]int{7},[]int{7},[]int{7},[]int{8},[]int{8},[]int{8},[]int{9},[]int{9},[]int{9}},
+        [][]int{[]int{7},[]int{7},[]int{7},[]int{8},[]int{8},[]int{8},[]int{9},[]int{9},[]int{9}},
+    }
+
+    expected := [][][]int{
+        [][]int{[]int{1},[]int{1},[]int{1},[]int{1},[]int{1},[]int{1},[]int{1},[]int{1},[]int{1},},
+        [][]int{[]int{2},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2},[]int{2},},
+        [][]int{[]int{3},[]int{3},[]int{3},[]int{3},[]int{3},[]int{3},[]int{3},[]int{3},[]int{3},},
+        [][]int{[]int{4},[]int{4},[]int{4},[]int{4},[]int{4},[]int{4},[]int{4},[]int{4},[]int{4},},
+        [][]int{[]int{5},[]int{5},[]int{5},[]int{5},[]int{5},[]int{5},[]int{5},[]int{5},[]int{5},},
+        [][]int{[]int{6},[]int{6},[]int{6},[]int{6},[]int{6},[]int{6},[]int{6},[]int{6},[]int{6},},
+        [][]int{[]int{7},[]int{7},[]int{7},[]int{7},[]int{7},[]int{7},[]int{7},[]int{7},[]int{7},},
+        [][]int{[]int{8},[]int{8},[]int{8},[]int{8},[]int{8},[]int{8},[]int{8},[]int{8},[]int{8},},
+        [][]int{[]int{9},[]int{9},[]int{9},[]int{9},[]int{9},[]int{9},[]int{9},[]int{9},[]int{9},},
+    }
+
+    validateSameCells(t, expected, squaresOf(input))
+}
+
 func TestColumnsOf(t *testing.T) {
     input := [][][]int{
             [][]int{[]int{1},[]int{2},[]int{3}},
@@ -283,6 +386,10 @@ func Step(board [][][]int, filter func([][]int)) {
     cols := columnsOf(board)
     for _, col := range cols {
         filter(col)
+    }
+    squares := squaresOf(board)
+    for _, square := range squares {
+        filter(square)
     }
 }
 
@@ -327,7 +434,7 @@ func validateSameCells(t *testing.T, expected [][][]int, rows [][][]int) {
 
     for _, r := range expected {
         if !containsData(rows, r) {
-            t.Errorf("Cannot find row data %v in %v", r, expected)
+            t.Errorf("Cannot find row data %v in %v", r, rows)
         }
     }
 }
@@ -351,6 +458,39 @@ func TestCallsFunctionOnCols(t *testing.T) {
     })
 
     validateSameCells(t, expected, cols)
+}
+
+func TestCallsFunctionOnSquares(t *testing.T) {
+    squares := [][][]int{}
+    input := [][][]int{
+        [][]int{[]int{1},[]int{2},[]int{3},[]int{4},[]int{5},[]int{6},[]int{7},[]int{8},[]int{9}},
+        [][]int{[]int{9},[]int{1},[]int{2},[]int{3},[]int{4},[]int{5},[]int{6},[]int{7},[]int{8}},
+        [][]int{[]int{8},[]int{9},[]int{1},[]int{2},[]int{3},[]int{4},[]int{5},[]int{6},[]int{7}},
+        [][]int{[]int{7},[]int{8},[]int{9},[]int{1},[]int{2},[]int{3},[]int{4},[]int{5},[]int{6}},
+        [][]int{[]int{6},[]int{7},[]int{8},[]int{9},[]int{1},[]int{2},[]int{3},[]int{4},[]int{5}},
+        [][]int{[]int{5},[]int{6},[]int{7},[]int{8},[]int{9},[]int{1},[]int{2},[]int{3},[]int{4}},
+        [][]int{[]int{4},[]int{5},[]int{6},[]int{7},[]int{8},[]int{9},[]int{1},[]int{2},[]int{3}},
+        [][]int{[]int{3},[]int{4},[]int{5},[]int{6},[]int{7},[]int{8},[]int{9},[]int{1},[]int{2}},
+        [][]int{[]int{2},[]int{3},[]int{4},[]int{5},[]int{6},[]int{7},[]int{8},[]int{9},[]int{1}},
+    }
+
+    expected := [][][]int{
+        [][]int{[]int{1},[]int{2},[]int{3},[]int{9},[]int{1},[]int{2},[]int{8},[]int{9},[]int{1}},
+        [][]int{[]int{4},[]int{5},[]int{6},[]int{3},[]int{4},[]int{5},[]int{2},[]int{3},[]int{4}},
+        [][]int{[]int{7},[]int{8},[]int{9},[]int{6},[]int{7},[]int{8},[]int{5},[]int{6},[]int{7}},
+        [][]int{[]int{7},[]int{8},[]int{9},[]int{6},[]int{7},[]int{8},[]int{5},[]int{6},[]int{7}},
+        [][]int{[]int{1},[]int{2},[]int{3},[]int{9},[]int{1},[]int{2},[]int{8},[]int{9},[]int{1}},
+        [][]int{[]int{4},[]int{5},[]int{6},[]int{3},[]int{4},[]int{5},[]int{2},[]int{3},[]int{4}},
+        [][]int{[]int{4},[]int{5},[]int{6},[]int{3},[]int{4},[]int{5},[]int{2},[]int{3},[]int{4}},
+        [][]int{[]int{7},[]int{8},[]int{9},[]int{6},[]int{7},[]int{8},[]int{5},[]int{6},[]int{7}},
+        [][]int{[]int{1},[]int{2},[]int{3},[]int{9},[]int{1},[]int{2},[]int{8},[]int{9},[]int{1}},
+    }
+
+    Step(input, func(board [][]int) {
+        squares = append(squares, board)
+    })
+
+    validateSameCells(t, expected, squares)
 }
 
 /*
