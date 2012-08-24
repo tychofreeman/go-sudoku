@@ -2,173 +2,31 @@ package sudoku
 
 import (
     "testing"
-    "math"
-    "fmt"
     "matchers"
-    "reflect"
 )
 
-type Board [][][]int
+func containsData(container [][][]int, containee [][]int) bool {
+    Row: for i := range container {
+        for j := range container[i] {
+            for k := range container[i][j] {
+                if len(containee) <= j || len(containee[j]) <= k || containee[j][k] != container[i][j][k] {
+                    continue Row
 
-func (b Board) Equals(other interface{}) (bool, string) {
-    switch o := other.(type) {
-        case [][][]int:
-            boardLength := len(b)
-            boardWidth := 0
-            if boardLength > 0 {
-                boardWidth = len((b)[0])
-            }
-
-            otherLength := len((o))
-            otherWidth := 0
-            if otherLength > 0 {
-                otherWidth = len((o)[0])
-            }
-            if boardLength != otherLength || boardWidth != otherWidth {
-                return false, fmt.Sprintf("mismatch between %v-by-%v and %v-by-%v boards", boardLength, boardWidth, otherLength, otherWidth)
-            }
-            equals := true
-            msg := fmt.Sprintf("\n")
-            for i := range b {
-                if boardWidth != len((b)[i]) || otherWidth != len((o)[i]) {
-                    return false, fmt.Sprintf("the board (or other board) is not of equal widths!")
-                }
-                for j := range b[i] {
-                    sameLen := len(b[i][j]) == len(o[i][j])
-                    if len(b[i][j]) == 0 {
-                        equals = equals && sameLen
-                        msg += "| X "
-                    } else if len(o[i][j]) == 0 {
-                        equals = equals && sameLen
-                        msg += "| # "
-                    } else if b[i][j][0] != o[i][j][0] {
-                        equals = false
-                        msg += fmt.Sprintf("|%v %v", b[i][j][0], o[i][j][0])
-                    } else {
-                        msg += fmt.Sprintf("|   ")
-                    }
-                }
-                msg += fmt.Sprintf("\n")
-            }
-
-            return equals, msg
-    }
-    return false, fmt.Sprintf("a Board cannot equal a %v", reflect.TypeOf(other))
-}
-
-func MapMissingValues(board [][]int) []int {
-    found := make([]int, len(board))
-    for _, v := range board {
-        if len(v) == 1 {
-            found[v[0]-1] = v[0]
-        }
-    }
-
-    notFound := make([]int, 0)
-    for i, v := range found {
-        if v == 0 {
-            notFound = append(notFound, i + 1)
-        }
-    }
-    return notFound
-}
-
-func union(prevCalcd, remaining []int) []int {
-    if len(prevCalcd) > 0 {
-        rtn := make([]int, 0)
-        for _, pv := range prevCalcd {
-            for _, rv := range remaining {
-                if pv == rv {
-                    rtn = append(rtn, pv)
                 }
             }
         }
-        return rtn
+        return true
     }
-    return remaining
+    return false
 }
 
-func IsolateSingletons(board [][]int) [][]int {
-    // EFFING Magic Numbers!!!
-    singletons := make([]int, len(board) + 1)
-    for i := range singletons {
-        singletons[i] = -1
-    }
-    for i := range board {
-        for _, v := range board[i] {
-            if singletons[v] == -1 {
-                singletons[v] = i
-            } else {
-                singletons[v] = -2
-            }
+func validateSameCells(t *testing.T, expected [][][]int, rows [][][]int) {
+
+    for _, r := range expected {
+        if !containsData(rows, r) {
+            t.Errorf("Cannot find row data %v in %v", r, rows)
         }
     }
-
-    for i := range singletons {
-        if singletons[i] > -1 {
-            board[singletons[i]] = make([]int, 1)
-            board[singletons[i]][0] = i
-        }
-    }
-
-    return board
-}
-
-func NormalizeBoard(board [][]int) [][]int {
-    max := len(board)
-    outBoard := make([][]int, max)
-    for i := range board {
-        if len(board[i]) == 0 {
-            outBoard[i] = make([]int, max)
-            for j := 0; j < max; j++ {
-                outBoard[i][j] = j + 1
-            }
-        } else {
-            iLen := len(board[i])
-            outBoard[i] = make([]int, iLen)
-            for j := 0; j < iLen; j++ {
-                outBoard[i][j] = board[i][j]
-            }
-        }
-    }
-    return outBoard
-}
-
-func TestNormalizeEmptyBoard(t *testing.T) {
-    input := [][]int{[]int{}, []int{}}
-    expected := [][]int{[]int{1,2}, []int{1,2}}
-
-    actual := NormalizeBoard(input)
-
-    for i := range actual {
-        for j := range actual[i] {
-            if actual[i][j] != expected[i][j] {
-                t.Errorf("At %v,%v actual %v but expected %v", i, j, actual[i][j], expected[i][j])
-            }
-        }
-    }
-}
-
-func ConstrainSet(board [][]int) [][]int {
-    board = NormalizeBoard(board)
-    board = IsolateSingletons(board)
-    // Isolate any missing values
-
-    notFound := MapMissingValues(board)
-
-    missingValue := make([][]int, len(board))
-    for i, cell := range board {
-        missingValue[i] = make([]int, 0)
-        if len(cell) == 0 {
-            missingValue[i] = notFound
-        } else if len(cell) != 1 {
-            missingValue[i] = union(cell, notFound)
-        } else {
-            missingValue[i] = cell
-        }
-    }
-
-    return missingValue
 }
 
 func IsExactly(candidate []int, value []int) bool {
@@ -197,6 +55,21 @@ func HasAllOf(candidate []int, values []int) bool {
         }
     }
     return true
+}
+
+func TestNormalizeEmptyBoard(t *testing.T) {
+    input := [][]int{[]int{}, []int{}}
+    expected := [][]int{[]int{1,2}, []int{1,2}}
+
+    actual := NormalizeBoard(input)
+
+    for i := range actual {
+        for j := range actual[i] {
+            if actual[i][j] != expected[i][j] {
+                t.Errorf("At %v,%v actual %v but expected %v", i, j, actual[i][j], expected[i][j])
+            }
+        }
+    }
 }
 
 func TestZeroSizedBoard(t *testing.T) {
@@ -314,51 +187,6 @@ func TestIsolatesANumberWhichOnlyAppearsOnceAndDoesNotFallForStupidTricks(t *tes
     }
 }
 
-func columnsOf(board [][][]int) [][][]int {
-    output := make([][][]int, len(board[0]))
-    for i := range output {
-        output[i] = make([][]int, len(board))
-    }
-    for i := range board {
-        for j := range board[i] {
-            output[j][i] = board[i][j]
-        }
-    }
-    return output
-}
-
-func squaresOf(board [][][]int) [][][]int {
-    output := make([][][]int, len(board))
-    for i := range output {
-        output[i] = make([][]int, len(board))
-    }
-    coords := coordsMapForBoardOfLength(len(board))
-    for i := range board {
-        for j := range board[i] {
-            outI, outJ := coords(i, j)
-            if len(output) <= outI || len(output[outI]) <= outJ {
-                fmt.Printf("Failed at output[%v][%v]: %v, %v\n", outI, outJ, i, j)
-            }
-            output[outI][outJ] = board[i][j]
-        }
-    }
-    return output
-}
-
-func coordsMapForBoardOfLength(length int) (func(int,int) (int,int)) {
-    fLen := float64(length)
-    squareSize := int(math.Floor(math.Sqrt(fLen)))
-    if squareSize * squareSize != length {
-        return func(i,j int) (int,int) {
-            return 0,0
-        }
-    }
-    return func(i, j int) (int, int) {
-        return ((i/squareSize)*squareSize + j/squareSize), (j%squareSize + (i%squareSize)*squareSize)
-    }
-}
-
-
 func TestDegenerateCoords3By3MapTo1By1Squares(t *testing.T) {
     data := [][]int{
         []int{0,0,0,0},
@@ -447,33 +275,6 @@ func TestColumnsOf(t *testing.T) {
     validateSameCells(t, expected, columnsOf(input))
 }
 
-func (board Board) Step(filter func([][]int) [][]int) (Board) {
-    for i := range board {
-        board[i] = filter(board[i])
-    }
-
-    cols := columnsOf(board)
-    for i, col := range cols {
-        updatedCol := filter(col)
-        for j := range updatedCol {
-            board[j][i] = updatedCol[j]
-        }
-    }
-
-    squares := squaresOf(board)
-    for i, square := range squares {
-        squares[i] = filter(square)
-    }
-    mapper := coordsMapForBoardOfLength(len(board))
-    for i := range board {
-        for j := range board[i] {
-            squareI, squareJ := mapper(i, j)
-            board[i][j] = squares[squareI][squareJ]
-        }
-    }
-    return board
-}
-
 func TestCallsFunction(t *testing.T) {
     wasCalled := false
     input := Board{[][]int{[]int{1}}}
@@ -495,30 +296,6 @@ func TestCallsFunctionOnRows(t *testing.T) {
     })
 
     validateSameCells(t, input, rows)
-}
-
-func containsData(container [][][]int, containee [][]int) bool {
-    Row: for i := range container {
-        for j := range container[i] {
-            for k := range container[i][j] {
-                if len(containee) <= j || len(containee[j]) <= k || containee[j][k] != container[i][j][k] {
-                    continue Row
-
-                }
-            }
-        }
-        return true
-    }
-    return false
-}
-
-func validateSameCells(t *testing.T, expected [][][]int, rows [][][]int) {
-
-    for _, r := range expected {
-        if !containsData(rows, r) {
-            t.Errorf("Cannot find row data %v in %v", r, rows)
-        }
-    }
 }
 
 func TestCallsFunctionOnCols(t *testing.T) {
@@ -575,14 +352,6 @@ func TestCallsFunctionOnSquares(t *testing.T) {
     })
 
     validateSameCells(t, expected, squares)
-}
-
-func (input Board) Solve() ([][][]int) {
-    input.Step(ConstrainSet)
-    for i := 0; i < 1000; i = i + 1 {
-        input = input.Step(ConstrainSet)
-    }
-    return input
 }
 
 var unsolved Board = Board{
