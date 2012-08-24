@@ -3,7 +3,58 @@ package sudoku
 import (
     "testing"
     "math"
+    "fmt"
+    "matchers"
+    "reflect"
 )
+
+type Board [][][]int
+
+func (b Board) Equals(other interface{}) (bool, string) {
+    switch o := other.(type) {
+        case [][][]int:
+            boardLength := len(b)
+            boardWidth := 0
+            if boardLength > 0 {
+                boardWidth = len((b)[0])
+            }
+
+            otherLength := len((o))
+            otherWidth := 0
+            if otherLength > 0 {
+                otherWidth = len((o)[0])
+            }
+            if boardLength != otherLength || boardWidth != otherWidth {
+                return false, fmt.Sprintf("mismatch between %v-by-%v and %v-by-%v boards", boardLength, boardWidth, otherLength, otherWidth)
+            }
+            equals := true
+            msg := fmt.Sprintf("\n")
+            for i := range b {
+                if boardWidth != len((b)[i]) || otherWidth != len((o)[i]) {
+                    return false, fmt.Sprintf("the board (or other board) is not of equal widths!")
+                }
+                for j := range b[i] {
+                    sameLen := len(b[i][j]) == len(o[i][j])
+                    if len(b[i][j]) == 0 {
+                        equals = equals && sameLen
+                        msg += "| X "
+                    } else if len(o[i][j]) == 0 {
+                        equals = equals && sameLen
+                        msg += "| # "
+                    } else if b[i][j][0] != o[i][j][0] {
+                        equals = false
+                        msg += fmt.Sprintf("|%v %v", b[i][j][0], o[i][j][0])
+                    } else {
+                        msg += fmt.Sprintf("|   ")
+                    }
+                }
+                msg += fmt.Sprintf("\n")
+            }
+
+            return equals, msg
+    }
+    return false, fmt.Sprintf("a Board cannot equal a %v", reflect.TypeOf(other))
+}
 
 func MapMissingValues(board [][]int) []int {
     found := make([]int, len(board))
@@ -38,9 +89,8 @@ func union(prevCalcd, remaining []int) []int {
 }
 
 func IsolateSingletons(board [][]int) [][]int {
-    // Isolate singletons...
     // EFFING Magic Numbers!!!
-    singletons := make([]int, 9)
+    singletons := make([]int, len(board) + 1)
     for i := range singletons {
         singletons[i] = -1
     }
@@ -82,6 +132,21 @@ func NormalizeBoard(board [][]int) [][]int {
         }
     }
     return outBoard
+}
+
+func TestNormalizeEmptyBoard(t *testing.T) {
+    input := [][]int{[]int{}, []int{}}
+    expected := [][]int{[]int{1,2}, []int{1,2}}
+
+    actual := NormalizeBoard(input)
+
+    for i := range actual {
+        for j := range actual[i] {
+            if actual[i][j] != expected[i][j] {
+                t.Errorf("At %v,%v actual %v but expected %v", i, j, actual[i][j], expected[i][j])
+            }
+        }
+    }
 }
 
 func ConstrainSet(board [][]int) [][]int {
@@ -271,6 +336,9 @@ func squaresOf(board [][][]int) [][][]int {
     for i := range board {
         for j := range board[i] {
             outI, outJ := coords(i, j)
+            if len(output) <= outI || len(output[outI]) <= outJ {
+                fmt.Printf("Failed at output[%v][%v]: %v, %v\n", outI, outJ, i, j)
+            }
             output[outI][outJ] = board[i][j]
         }
     }
@@ -379,37 +447,51 @@ func TestColumnsOf(t *testing.T) {
     validateSameCells(t, expected, columnsOf(input))
 }
 
-func Step(board [][][]int, filter func([][]int)) {
+func (board Board) Step(filter func([][]int) [][]int) (Board) {
     for i := range board {
-        filter(board[i])
+        board[i] = filter(board[i])
     }
+
     cols := columnsOf(board)
-    for _, col := range cols {
-        filter(col)
+    for i, col := range cols {
+        updatedCol := filter(col)
+        for j := range updatedCol {
+            board[j][i] = updatedCol[j]
+        }
     }
+
     squares := squaresOf(board)
-    for _, square := range squares {
-        filter(square)
+    for i, square := range squares {
+        squares[i] = filter(square)
     }
+    mapper := coordsMapForBoardOfLength(len(board))
+    for i := range board {
+        for j := range board[i] {
+            squareI, squareJ := mapper(i, j)
+            board[i][j] = squares[squareI][squareJ]
+        }
+    }
+    return board
 }
 
 func TestCallsFunction(t *testing.T) {
     wasCalled := false
-    input := [][][]int{[][]int{[]int{1}}}
-    Step(input, func(board [][]int) { wasCalled = true })
+    input := Board{[][]int{[]int{1}}}
+    input.Step(func(board [][]int) [][]int { wasCalled = true; return [][]int{};  })
     if !wasCalled {
         t.Errorf("Expected function to be called by Step(), but was not.")
     }
 }
 
 func TestCallsFunctionOnRows(t *testing.T) {
-    rows := [][][]int{}
-    input := [][][]int{[][]int{[]int{1},[]int{2},[]int{3}}, [][]int{[]int{1},[]int{2},[]int{3}}, [][]int{[]int{1},[]int{2},[]int{3}},
+    rows := Board{}
+    input := Board{[][]int{[]int{1},[]int{2},[]int{3}}, [][]int{[]int{1},[]int{2},[]int{3}}, [][]int{[]int{1},[]int{2},[]int{3}},
                        [][]int{}, [][]int{}, [][]int{},
                        [][]int{}, [][]int{}, [][]int{}}
 
-    Step(input, func(board [][]int) {
+    input.Step(func(board [][]int) [][]int {
         rows = append(rows, board)
+        return [][]int{};
     })
 
     validateSameCells(t, input, rows)
@@ -440,29 +522,30 @@ func validateSameCells(t *testing.T, expected [][][]int, rows [][][]int) {
 }
 
 func TestCallsFunctionOnCols(t *testing.T) {
-    cols := [][][]int{}
-    input := [][][]int{
+    cols := Board{}
+    input := Board{
                 [][]int{[]int{1},[]int{2},[]int{6}},
                 [][]int{[]int{4},[]int{5},[]int{8}},
                 [][]int{[]int{3},[]int{9},[]int{7}},
             }
 
-    expected := [][][]int{
+    expected := Board{
         [][]int{[]int{1},[]int{4},[]int{3}},
         [][]int{[]int{2},[]int{5},[]int{9}},
         [][]int{[]int{6},[]int{8},[]int{7}},
     }
 
-    Step(input, func(board [][]int) {
+    input.Step(func(board [][]int) [][]int {
         cols = append(cols, board)
+        return [][]int{}
     })
 
     validateSameCells(t, expected, cols)
 }
 
 func TestCallsFunctionOnSquares(t *testing.T) {
-    squares := [][][]int{}
-    input := [][][]int{
+    squares := Board{}
+    input := Board{
         [][]int{[]int{1},[]int{2},[]int{3},[]int{4},[]int{5},[]int{6},[]int{7},[]int{8},[]int{9}},
         [][]int{[]int{9},[]int{1},[]int{2},[]int{3},[]int{4},[]int{5},[]int{6},[]int{7},[]int{8}},
         [][]int{[]int{8},[]int{9},[]int{1},[]int{2},[]int{3},[]int{4},[]int{5},[]int{6},[]int{7}},
@@ -474,7 +557,7 @@ func TestCallsFunctionOnSquares(t *testing.T) {
         [][]int{[]int{2},[]int{3},[]int{4},[]int{5},[]int{6},[]int{7},[]int{8},[]int{9},[]int{1}},
     }
 
-    expected := [][][]int{
+    expected := Board{
         [][]int{[]int{1},[]int{2},[]int{3},[]int{9},[]int{1},[]int{2},[]int{8},[]int{9},[]int{1}},
         [][]int{[]int{4},[]int{5},[]int{6},[]int{3},[]int{4},[]int{5},[]int{2},[]int{3},[]int{4}},
         [][]int{[]int{7},[]int{8},[]int{9},[]int{6},[]int{7},[]int{8},[]int{5},[]int{6},[]int{7}},
@@ -486,29 +569,74 @@ func TestCallsFunctionOnSquares(t *testing.T) {
         [][]int{[]int{1},[]int{2},[]int{3},[]int{9},[]int{1},[]int{2},[]int{8},[]int{9},[]int{1}},
     }
 
-    Step(input, func(board [][]int) {
+    input.Step(func(board [][]int) [][]int {
         squares = append(squares, board)
+        return [][]int{}
     })
 
     validateSameCells(t, expected, squares)
 }
 
-/*
+func (input Board) Solve() ([][][]int) {
+    input.Step(ConstrainSet)
+    for i := 0; i < 1000; i = i + 1 {
+        input = input.Step(ConstrainSet)
+    }
+    return input
+}
+
+var unsolved Board = Board{
+    [][]int{[]int{ },[]int{1},[]int{ },[]int{6},[]int{ },[]int{7},[]int{ },[]int{ },[]int{4}},
+    [][]int{[]int{ },[]int{4},[]int{2},[]int{ },[]int{ },[]int{ },[]int{ },[]int{ },[]int{ }},
+    [][]int{[]int{8},[]int{7},[]int{ },[]int{3},[]int{ },[]int{ },[]int{6},[]int{ },[]int{ }},
+    [][]int{[]int{ },[]int{8},[]int{ },[]int{ },[]int{7},[]int{ },[]int{ },[]int{2},[]int{ }},
+    [][]int{[]int{ },[]int{ },[]int{ },[]int{8},[]int{9},[]int{3},[]int{ },[]int{ },[]int{ }},
+    [][]int{[]int{ },[]int{3},[]int{ },[]int{ },[]int{6},[]int{ },[]int{ },[]int{1},[]int{ }},
+    [][]int{[]int{ },[]int{ },[]int{8},[]int{ },[]int{ },[]int{6},[]int{ },[]int{4},[]int{5}},
+    [][]int{[]int{ },[]int{ },[]int{ },[]int{ },[]int{ },[]int{ },[]int{1},[]int{7},[]int{ }},
+    [][]int{[]int{4},[]int{ },[]int{ },[]int{9},[]int{ },[]int{8},[]int{ },[]int{6},[]int{ }},
+}
+var solved Board = Board{
+    [][]int{[]int{9},[]int{1},[]int{3},[]int{6},[]int{2},[]int{7},[]int{5},[]int{8},[]int{4}},
+    [][]int{[]int{6},[]int{4},[]int{2},[]int{5},[]int{8},[]int{9},[]int{7},[]int{3},[]int{1}},
+    [][]int{[]int{8},[]int{7},[]int{5},[]int{3},[]int{4},[]int{1},[]int{6},[]int{9},[]int{2}},
+    [][]int{[]int{5},[]int{8},[]int{9},[]int{1},[]int{7},[]int{4},[]int{3},[]int{2},[]int{6}},
+    [][]int{[]int{2},[]int{6},[]int{1},[]int{8},[]int{9},[]int{3},[]int{4},[]int{5},[]int{7}},
+    [][]int{[]int{7},[]int{3},[]int{4},[]int{2},[]int{6},[]int{5},[]int{8},[]int{1},[]int{9}},
+    [][]int{[]int{1},[]int{2},[]int{8},[]int{7},[]int{3},[]int{6},[]int{9},[]int{4},[]int{5}},
+    [][]int{[]int{3},[]int{9},[]int{6},[]int{4},[]int{5},[]int{2},[]int{1},[]int{7},[]int{8}},
+    [][]int{[]int{4},[]int{5},[]int{7},[]int{9},[]int{1},[]int{8},[]int{2},[]int{6},[]int{3}},
+}
+
+func TestStepThroughIt(t *testing.T) {
+    unsolved.Step(ConstrainSet)
+}
+
 func TestSolvesThis(t *testing.T) {
-    input := [][][]int{
-        [][]int{[]int{},[]int{1},[]int{},[]int{6},[]int{},[]int{7},[]int{},[]int{},[]int{4}},
-        [][]int{[]int{},[]int{4},[]int{2},[]int{},[]int{},[]int{},[]int{},[]int{},[]int{}},
-        [][]int{[]int{8},[]int{7},[]int{},[]int{3},[]int{},[]int{},[]int{6},[]int{},[]int{}},
-        [][]int{[]int{},[]int{8},[]int{},[]int{},[]int{7},[]int{},[]int{},[]int{2},[]int{}},
-        [][]int{[]int{},[]int{},[]int{},[]int{8},[]int{9},[]int{3},[]int{},[]int{},[]int{}},
-        [][]int{[]int{},[]int{3},[]int{},[]int{},[]int{6},[]int{},[]int{},[]int{1},[]int{}},
-        [][]int{[]int{},[]int{},[]int{8},[]int{},[]int{},[]int{6},[]int{},[]int{4},[]int{5}},
-        [][]int{[]int{},[]int{},[]int{},[]int{},[]int{},[]int{},[]int{1},[]int{7},[]int{}},
-        [][]int{[]int{4},[]int{},[]int{},[]int{9},[]int{},[]int{8},[]int{},[]int{6},[]int{}},
+    input := Board{
+        [][]int{[]int{ },[]int{1},[]int{ },[]int{6},[]int{ },[]int{7},[]int{ },[]int{ },[]int{4}},
+        [][]int{[]int{ },[]int{4},[]int{2},[]int{ },[]int{ },[]int{ },[]int{ },[]int{ },[]int{ }},
+        [][]int{[]int{8},[]int{7},[]int{ },[]int{3},[]int{ },[]int{ },[]int{6},[]int{ },[]int{ }},
+        [][]int{[]int{ },[]int{8},[]int{ },[]int{ },[]int{7},[]int{ },[]int{ },[]int{2},[]int{ }},
+        [][]int{[]int{ },[]int{ },[]int{ },[]int{8},[]int{9},[]int{3},[]int{ },[]int{ },[]int{ }},
+        [][]int{[]int{ },[]int{3},[]int{ },[]int{ },[]int{6},[]int{ },[]int{ },[]int{1},[]int{ }},
+        [][]int{[]int{ },[]int{ },[]int{8},[]int{ },[]int{ },[]int{6},[]int{ },[]int{4},[]int{5}},
+        [][]int{[]int{ },[]int{ },[]int{ },[]int{ },[]int{ },[]int{ },[]int{1},[]int{7},[]int{ }},
+        [][]int{[]int{4},[]int{ },[]int{ },[]int{9},[]int{ },[]int{8},[]int{ },[]int{6},[]int{ }},
     }
 
-    Step(input, func(board [][]int) {
-        input = ConstrainSet(input)
-    })
+    expected := Board{
+        [][]int{[]int{9},[]int{1},[]int{3},[]int{6},[]int{2},[]int{7},[]int{5},[]int{8},[]int{4}},
+        [][]int{[]int{6},[]int{4},[]int{2},[]int{5},[]int{8},[]int{9},[]int{7},[]int{3},[]int{1}},
+        [][]int{[]int{8},[]int{7},[]int{5},[]int{3},[]int{4},[]int{1},[]int{6},[]int{9},[]int{2}},
+        [][]int{[]int{5},[]int{8},[]int{9},[]int{1},[]int{7},[]int{4},[]int{3},[]int{2},[]int{6}},
+        [][]int{[]int{2},[]int{6},[]int{1},[]int{8},[]int{9},[]int{3},[]int{4},[]int{5},[]int{7}},
+        [][]int{[]int{7},[]int{3},[]int{4},[]int{2},[]int{6},[]int{5},[]int{8},[]int{1},[]int{9}},
+        [][]int{[]int{1},[]int{2},[]int{8},[]int{7},[]int{3},[]int{6},[]int{9},[]int{4},[]int{5}},
+        [][]int{[]int{3},[]int{9},[]int{6},[]int{4},[]int{5},[]int{2},[]int{1},[]int{7},[]int{8}},
+        [][]int{[]int{4},[]int{5},[]int{7},[]int{9},[]int{1},[]int{8},[]int{2},[]int{6},[]int{3}},
+    }
+    output := input.Solve()
+
+    matchers.AssertThat(t, output, matchers.Equals(expected))
 }
-*/
