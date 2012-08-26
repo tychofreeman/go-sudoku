@@ -7,9 +7,9 @@ import (
 
 
 // Insert into a set (row/column/square) any of the values which aren't known to be in that set.
-func mapMissingValues(board Set) Cell {
-    found := make(Cell, len(board))
-    for _, v := range board {
+func mapMissingValues(set Set) Cell {
+    found := make(Cell, len(set))
+    for _, v := range set {
         if len(v) == 1 {
             found[v[0]-1] = v[0]
         }
@@ -164,15 +164,15 @@ func (board Board) Step(filter func(Set) Set) (Board) {
 
 // Given a row/col/square, propogate constraints on it.
 // This is the pluggable part
-func ConstrainSet(board Set) Set {
-    board = NormalizeBoard(board)
-    board = IsolateSingletons(board)
+func ConstrainSet(set Set) Set {
+    set = NormalizeBoard(set)
+    set = IsolateSingletons(set)
     // Isolate any missing values
 
-    notFound := mapMissingValues(board)
+    notFound := mapMissingValues(set)
 
-    missingValue := make(Set, len(board))
-    for i, cell := range board {
+    missingValue := make(Set, len(set))
+    for i, cell := range set {
         missingValue[i] = Cell{}
         if len(cell) == 0 {
             missingValue[i] = notFound
