@@ -7,7 +7,7 @@ import (
 
 
 // Insert into a set (row/column/square) any of the values which aren't known to be in that set.
-func mapMissingValues(set Set) Cell {
+func findMissingValues(set Set) Cell {
     found := make(Cell, len(set))
     for _, v := range set {
         if len(v) == 1 {
@@ -169,7 +169,7 @@ func ConstrainSet(set Set) Set {
     set = IsolateSingletons(set)
     // Isolate any missing values
 
-    notFound := mapMissingValues(set)
+    notFound := findMissingValues(set)
 
     missingValue := make(Set, len(set))
     for i, cell := range set {
