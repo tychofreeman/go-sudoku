@@ -21,3 +21,22 @@ func (prevCalcd Cell) union(remaining Cell) Cell {
 func (c Cell) isEmpty() bool {
     return len(c) == 0
 }
+
+func (c Cell) Equals(o Cell) bool {
+    if len(c) != len(o) {
+        return false
+    }
+    for _, v := range c {
+        found := false
+        for _, v2 := range o {
+            if v2 == v {
+                found = true
+                break
+            }
+        }
+        if !found {
+            return false
+        }
+    }
+    return true
+}

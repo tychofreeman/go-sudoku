@@ -39,9 +39,9 @@ func (b Board) Equals(other interface{}) (bool, string) {
                     } else if o[i][j].isEmpty() {
                         equals = equals && sameLen
                         msg += "| # "
-                    } else if b[i][j][0] != o[i][j][0] {
+                    } else if !b[i][j].Equals(o[i][j]) {
                         equals = false
-                        msg += fmt.Sprintf("|%v %v", b[i][j][0], o[i][j][0])
+                        msg += fmt.Sprintf("|%v %v", b[i][j], o[i][j])
                     } else {
                         msg += fmt.Sprintf("|   ")
                     }
