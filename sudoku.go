@@ -33,10 +33,10 @@ func (b Board) Equals(other interface{}) (bool, string) {
                 }
                 for j := range b[i] {
                     sameLen := len(b[i][j]) == len(o[i][j])
-                    if len(b[i][j]) == 0 {
+                    if b[i][j].isEmpty() {
                         equals = equals && sameLen
                         msg += "| X "
-                    } else if len(o[i][j]) == 0 {
+                    } else if o[i][j].isEmpty() {
                         equals = equals && sameLen
                         msg += "| # "
                     } else if b[i][j][0] != o[i][j][0] {

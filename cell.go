@@ -17,3 +17,7 @@ func (prevCalcd Cell) union(remaining Cell) Cell {
     }
     return remaining
 }
+
+func (c Cell) isEmpty() bool {
+    return len(c) == 0
+}
