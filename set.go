@@ -1,3 +1,3 @@
 package sudoku
 
-type Set [][]int
+type Set []Cell

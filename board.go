@@ -1,3 +1,3 @@
 package sudoku
 
-type Board [][][]int
+type Board []Set

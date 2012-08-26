@@ -10,7 +10,7 @@ import (
 // Satisfy the Equalable interface so we can use matchers in the test.
 func (b Board) Equals(other interface{}) (bool, string) {
     switch o := other.(type) {
-        case [][][]int:
+        case Board:
             boardLength := len(b)
             boardWidth := 0
             if boardLength > 0 {
@@ -55,7 +55,7 @@ func (b Board) Equals(other interface{}) (bool, string) {
 }
 
 // Insert into a set (row/column/square) any of the values which aren't known to be in that set.
-func mapMissingValues(board [][]int) Cell {
+func mapMissingValues(board Set) Cell {
     found := make(Cell, len(board))
     for _, v := range board {
         if len(v) == 1 {
@@ -72,29 +72,13 @@ func mapMissingValues(board [][]int) Cell {
     return notFound
 }
 
-// Given two sets of ints, calculate the union
-func union(prevCalcd, remaining Cell) Cell {
-    if len(prevCalcd) > 0 {
-        rtn := make(Cell, 0)
-        for _, pv := range prevCalcd {
-            for _, rv := range remaining {
-                if pv == rv {
-                    rtn = append(rtn, pv)
-                }
-            }
-        }
-        return rtn
-    }
-    return remaining
-}
-
 /*
-func getPairs(input [][]int) map[Cell]Cell {
+func getPairs(input Set) map[Cell]Cell {
     
 }
 
-func IsolatePairedDoubles(input [][]int) [][]int {
-    pairs := make(map[[]int][]int)
+func IsolatePairedDoubles(input Set) Set {
+    pairs := make(map[Cell]Cell)
     for i := range input {
         
     }
@@ -104,7 +88,7 @@ func IsolatePairedDoubles(input [][]int) [][]int {
 */
 
 // For any value which appears in exactly one cell in a set, remove all other values from that cell
-func IsolateSingletons(board [][]int) [][]int {
+func IsolateSingletons(board Set) Set {
     singletons := make(Cell, len(board) + 1)
     for i := range singletons {
         singletons[i] = -1
@@ -130,9 +114,9 @@ func IsolateSingletons(board [][]int) [][]int {
 }
 
 // Populate all cells with the '0' value with a full range of possible values
-func NormalizeBoard(board [][]int) [][]int {
+func NormalizeBoard(board Set) Set {
     max := len(board)
-    outBoard := make([][]int, max)
+    outBoard := make(Set, max)
     for i := range board {
         if len(board[i]) == 0 {
             outBoard[i] = make(Cell, max)
@@ -151,10 +135,10 @@ func NormalizeBoard(board [][]int) [][]int {
 }
 
 // Map b[r][c] to b[c][r]
-func columnsOf(board [][][]int) [][][]int {
-    output := make([][][]int, len(board[0]))
+func columnsOf(board Board) Board {
+    output := make(Board, len(board[0]))
     for i := range output {
-        output[i] = make([][]int, len(board))
+        output[i] = make(Set, len(board))
     }
     for i := range board {
         for j := range board[i] {
@@ -165,10 +149,10 @@ func columnsOf(board [][][]int) [][][]int {
 }
 
 // Map each sub-square of the board to a row in the output.
-func squaresOf(board [][][]int) [][][]int {
-    output := make([][][]int, len(board))
+func squaresOf(board Board) Board {
+    output := make(Board, len(board))
     for i := range output {
-        output[i] = make([][]int, len(board))
+        output[i] = make(Set, len(board))
     }
     coords := coordsMapForBoardOfLength(len(board))
     for i := range board {
@@ -235,13 +219,13 @@ func ConstrainSet(board Set) Set {
 
     notFound := mapMissingValues(board)
 
-    missingValue := make([][]int, len(board))
+    missingValue := make(Set, len(board))
     for i, cell := range board {
-        missingValue[i] = make(Cell, 0)
+        missingValue[i] = Cell{}
         if len(cell) == 0 {
             missingValue[i] = notFound
         } else if len(cell) != 1 {
-            missingValue[i] = union(cell, notFound)
+            missingValue[i] = cell.union(notFound)
         } else {
             missingValue[i] = cell
         }
@@ -284,7 +268,7 @@ func (input Board) IsSolved() bool {
     return true
 }
 
-func (input Board) Solve() ([][][]int) {
+func (input Board) Solve() (Board) {
     input.Step(ConstrainSet)
     for !input.IsSolved() {
         input = input.Step(ConstrainSet)

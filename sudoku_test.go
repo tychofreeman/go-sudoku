@@ -6,7 +6,7 @@ import (
     "fmt"
 )
 
-func containsData(container [][][]int, containee Set) bool {
+func containsData(container Board, containee Set) bool {
     Row: for i := range container {
         for j := range container[i] {
             for k := range container[i][j] {
@@ -21,7 +21,7 @@ func containsData(container [][][]int, containee Set) bool {
     return false
 }
 
-func validateSameCells(t *testing.T, expected [][][]int, rows [][][]int) {
+func validateSameCells(t *testing.T, expected Board, rows Board) {
 
     for _, r := range expected {
         if !containsData(rows, r) {
@@ -234,7 +234,7 @@ func TestCoords9By9MapTo3By3Squares(t *testing.T) {
 }
 
 func _TestSauaresOf81CellBoardAre3X3Nondrants(t *testing.T) {
-    input := [][][]int{
+    input := Board{
         Set{Cell{1},Cell{1},Cell{1},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2}},
         Set{Cell{1},Cell{1},Cell{1},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2}},
         Set{Cell{1},Cell{1},Cell{1},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2}},
@@ -246,7 +246,7 @@ func _TestSauaresOf81CellBoardAre3X3Nondrants(t *testing.T) {
         Set{Cell{7},Cell{7},Cell{7},Cell{8},Cell{8},Cell{8},Cell{9},Cell{9},Cell{9}},
     }
 
-    expected := [][][]int{
+    expected := Board{
         Set{Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},},
         Set{Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},},
         Set{Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},},
@@ -262,13 +262,13 @@ func _TestSauaresOf81CellBoardAre3X3Nondrants(t *testing.T) {
 }
 
 func TestColumnsOf(t *testing.T) {
-    input := [][][]int{
+    input := Board{
             Set{Cell{1},Cell{2},Cell{3}},
             Set{Cell{1},Cell{2},Cell{3}},
             Set{Cell{1},Cell{2},Cell{3}},
             }
 
-    expected := [][][]int{
+    expected := Board{
             Set{Cell{1},Cell{1},Cell{1}},
             Set{Cell{2},Cell{2},Cell{2}},
             Set{Cell{3},Cell{3},Cell{3}},
@@ -289,7 +289,7 @@ func TestCallsFunctionOnRows(t *testing.T) {
     rows := Board{}
     input := Board{Set{Cell{1},Cell{2},Cell{3}}, Set{Cell{1},Cell{2},Cell{3}}, Set{Cell{1},Cell{2},Cell{3}},
                        Set{}, Set{}, Set{},
-                       Set{}, Set{}, [][]int{}}
+                       Set{}, Set{}, Set{}}
 
     input.Step(func(board Set) Set {
         rows = append(rows, board)
@@ -411,13 +411,13 @@ func TestSolvesThis(t *testing.T) {
     matchers.AssertThat(t, output, matchers.Equals(expected))
 }
 
-type CellSet [][]int
+type CellSet Set
 func (cs CellSet) Equals(other interface{}) (b bool, s string) {
     b = true
     s = ""
     
     switch o := other.(type) {
-    case [][]int:
+    case Set:
         for i := range cs {
             found := true
             if len(cs[i]) != len(o[i]) {
