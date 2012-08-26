@@ -6,7 +6,6 @@ import (
     "math"
 )
 
-type Board [][][]int
 
 // Satisfy the Equalable interface so we can use matchers in the test.
 func (b Board) Equals(other interface{}) (bool, string) {
@@ -56,15 +55,15 @@ func (b Board) Equals(other interface{}) (bool, string) {
 }
 
 // Insert into a set (row/column/square) any of the values which aren't known to be in that set.
-func mapMissingValues(board [][]int) []int {
-    found := make([]int, len(board))
+func mapMissingValues(board [][]int) Cell {
+    found := make(Cell, len(board))
     for _, v := range board {
         if len(v) == 1 {
             found[v[0]-1] = v[0]
         }
     }
 
-    notFound := make([]int, 0)
+    notFound := make(Cell, 0)
     for i, v := range found {
         if v == 0 {
             notFound = append(notFound, i + 1)
@@ -74,9 +73,9 @@ func mapMissingValues(board [][]int) []int {
 }
 
 // Given two sets of ints, calculate the union
-func union(prevCalcd, remaining []int) []int {
+func union(prevCalcd, remaining Cell) Cell {
     if len(prevCalcd) > 0 {
-        rtn := make([]int, 0)
+        rtn := make(Cell, 0)
         for _, pv := range prevCalcd {
             for _, rv := range remaining {
                 if pv == rv {
@@ -89,9 +88,24 @@ func union(prevCalcd, remaining []int) []int {
     return remaining
 }
 
+/*
+func getPairs(input [][]int) map[Cell]Cell {
+    
+}
+
+func IsolatePairedDoubles(input [][]int) [][]int {
+    pairs := make(map[[]int][]int)
+    for i := range input {
+        
+    }
+
+    return input
+}
+*/
+
 // For any value which appears in exactly one cell in a set, remove all other values from that cell
 func IsolateSingletons(board [][]int) [][]int {
-    singletons := make([]int, len(board) + 1)
+    singletons := make(Cell, len(board) + 1)
     for i := range singletons {
         singletons[i] = -1
     }
@@ -107,7 +121,7 @@ func IsolateSingletons(board [][]int) [][]int {
 
     for i := range singletons {
         if singletons[i] > -1 {
-            board[singletons[i]] = make([]int, 1)
+            board[singletons[i]] = make(Cell, 1)
             board[singletons[i]][0] = i
         }
     }
@@ -121,13 +135,13 @@ func NormalizeBoard(board [][]int) [][]int {
     outBoard := make([][]int, max)
     for i := range board {
         if len(board[i]) == 0 {
-            outBoard[i] = make([]int, max)
+            outBoard[i] = make(Cell, max)
             for j := 0; j < max; j++ {
                 outBoard[i][j] = j + 1
             }
         } else {
             iLen := len(board[i])
-            outBoard[i] = make([]int, iLen)
+            outBoard[i] = make(Cell, iLen)
             for j := 0; j < iLen; j++ {
                 outBoard[i][j] = board[i][j]
             }
@@ -184,7 +198,7 @@ func coordsMapForBoardOfLength(length int) (func(int,int) (int,int)) {
 }
 
 
-func (board Board) Step(filter func([][]int) [][]int) (Board) {
+func (board Board) Step(filter func(Set) Set) (Board) {
     for i := range board {
         board[i] = filter(board[i])
     }
@@ -213,8 +227,8 @@ func (board Board) Step(filter func([][]int) [][]int) (Board) {
 
 
 // Given a row/col/square, propogate constraints on it.
-// This is the pluggable part, though plugging doesn't seem to be necessary.
-func ConstrainSet(board [][]int) [][]int {
+// This is the pluggable part
+func ConstrainSet(board Set) Set {
     board = NormalizeBoard(board)
     board = IsolateSingletons(board)
     // Isolate any missing values
@@ -223,7 +237,7 @@ func ConstrainSet(board [][]int) [][]int {
 
     missingValue := make([][]int, len(board))
     for i, cell := range board {
-        missingValue[i] = make([]int, 0)
+        missingValue[i] = make(Cell, 0)
         if len(cell) == 0 {
             missingValue[i] = notFound
         } else if len(cell) != 1 {
@@ -236,10 +250,45 @@ func ConstrainSet(board [][]int) [][]int {
     return missingValue
 }
 
+func (input Board) GoString() string {
+    maxWidths := make(Cell, len(input))
+    out := ""
+    for _, row := range input {
+        for col, cell := range row {
+            cellWidth := len(fmt.Sprintf("%v", cell))
+            if maxWidths[col] < cellWidth {
+                maxWidths[col] = cellWidth
+            }
+        }
+    }
+
+    for _, row := range input {
+        out += "\t"
+        for col, cell := range row {
+            str := fmt.Sprintf("%v", cell)
+            out += fmt.Sprintf("%*s|", maxWidths[col], str)
+        }
+        out += "\n"
+    }
+    return out
+}
+
+func (input Board) IsSolved() bool {
+    for _, row := range input {
+        for _, cell := range row {
+            if len(cell) != 1 {
+                return false
+            }
+        }
+    }
+    return true
+}
+
 func (input Board) Solve() ([][][]int) {
     input.Step(ConstrainSet)
-    for i := 0; i < 1000; i = i + 1 {
+    for !input.IsSolved() {
         input = input.Step(ConstrainSet)
+        //fmt.Printf("Board: \n%#v\n", input)
     }
     return input
 }
