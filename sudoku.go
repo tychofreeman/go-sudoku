@@ -186,12 +186,16 @@ func ConstrainSet(set Set) Set {
     return missingValue
 }
 
+func GetWidth(cell Cell) int {
+    return len(fmt.Sprintf("%v", cell))
+}
+
 func (input Board) GoString() string {
     maxWidths := make(Cell, len(input))
     out := ""
     for _, row := range input {
         for col, cell := range row {
-            cellWidth := len(fmt.Sprintf("%v", cell))
+            cellWidth := GetWidth(cell)
             if maxWidths[col] < cellWidth {
                 maxWidths[col] = cellWidth
             }
