@@ -1,5 +1,9 @@
 package sudoku
 
+import (
+    "fmt"
+)
+
 type Cell []int
 
 // Given two sets of ints, calculate the union
@@ -39,4 +43,12 @@ func (c Cell) Equals(o Cell) bool {
         }
     }
     return true
+}
+
+func (cell Cell) GetWidth() int {
+    return len(fmt.Sprintf("%v", cell))
+}
+
+func (cell Cell) IsSolved() bool {
+    return len(cell) == 1
 }
