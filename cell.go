@@ -1,7 +1,6 @@
 package sudoku
 
 import (
-    "fmt"
 )
 
 type Cell []int
@@ -43,10 +42,6 @@ func (c Cell) Equals(o Cell) bool {
         }
     }
     return true
-}
-
-func (cell Cell) GetWidth() int {
-    return len(fmt.Sprintf("%v", cell))
 }
 
 func (cell Cell) IsSolved() bool {

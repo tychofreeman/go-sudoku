@@ -71,14 +71,19 @@ func Normalize(max int, cell *Cell) {
     }
 }
 
+func Create(max int) Cell {
+    cell := make(Cell, max)
+    Normalize(max, &cell)
+    return cell
+}
+
 // Populate all cells with the '0' value with a full range of possible values
 func NormalizeBoard(board Set) Set {
     max := len(board)
     outBoard := make(Set, max)
     for i := range board {
         if len(board[i]) == 0 {
-            outBoard[i] = make(Cell, max)
-            Normalize(max, &outBoard[i])
+            outBoard[i] = Create(max)
         } else {
             iLen := len(board[i])
             outBoard[i] = make(Cell, iLen)
