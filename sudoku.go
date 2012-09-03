@@ -65,6 +65,12 @@ func IsolateSingletons(board Set) Set {
     return board
 }
 
+func Normalize(max int, cell *Cell) {
+    for j := 0; j < max; j++ {
+        (*cell)[j] = j + 1
+    }
+}
+
 // Populate all cells with the '0' value with a full range of possible values
 func NormalizeBoard(board Set) Set {
     max := len(board)
@@ -72,9 +78,7 @@ func NormalizeBoard(board Set) Set {
     for i := range board {
         if len(board[i]) == 0 {
             outBoard[i] = make(Cell, max)
-            for j := 0; j < max; j++ {
-                outBoard[i][j] = j + 1
-            }
+            Normalize(max, &outBoard[i])
         } else {
             iLen := len(board[i])
             outBoard[i] = make(Cell, iLen)
@@ -191,7 +195,7 @@ func (input Board) GoString() string {
     out := ""
     for _, row := range input {
         for col, cell := range row {
-            cellWidth := cell.GetWidth()
+            cellWidth := len(fmt.Sprintf("%v", cell))
             if maxWidths[col] < cellWidth {
                 maxWidths[col] = cellWidth
             }
