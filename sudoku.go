@@ -77,6 +77,15 @@ func Create(max int) Cell {
     return cell
 }
 
+func Copy(boardCell Cell) Cell {
+    iLen := len(boardCell)
+    cell := make(Cell, iLen)
+    for j := 0; j < iLen; j++ {
+        cell[j] = boardCell[j]
+    }
+    return cell
+}
+
 // Populate all cells with the '0' value with a full range of possible values
 func NormalizeBoard(board Set) Set {
     max := len(board)
@@ -85,11 +94,7 @@ func NormalizeBoard(board Set) Set {
         if len(board[i]) == 0 {
             outBoard[i] = Create(max)
         } else {
-            iLen := len(board[i])
-            outBoard[i] = make(Cell, iLen)
-            for j := 0; j < iLen; j++ {
-                outBoard[i][j] = board[i][j]
-            }
+            outBoard[i] = Copy(board[i])
         }
     }
     return outBoard
