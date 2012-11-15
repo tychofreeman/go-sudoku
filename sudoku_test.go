@@ -1,8 +1,8 @@
 package sudoku
 
 import (
+    matchers "github.com/tychofreeman/go_matchers"
     "testing"
-    "matchers"
     "fmt"
 )
 
@@ -409,6 +409,24 @@ func TestSolvesThis(t *testing.T) {
     output := input.Solve()
 
     matchers.AssertThat(t, output, matchers.Equals(expected))
+}
+
+func TestSolvesExtremePuzzel(t *testing.T) {
+    input := Board{
+        Set{Cell{ },Cell{ },Cell{5},Cell{6},Cell{ },Cell{ },Cell{ },Cell{ },Cell{7}},
+        Set{Cell{ },Cell{6},Cell{ },Cell{ },Cell{4},Cell{ },Cell{ },Cell{8},Cell{ }},
+        Set{Cell{ },Cell{ },Cell{9},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{1}},
+        Set{Cell{7},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{1},Cell{ },Cell{ }},
+        Set{Cell{ },Cell{8},Cell{ },Cell{ },Cell{1},Cell{ },Cell{ },Cell{2},Cell{ }},
+        Set{Cell{ },Cell{ },Cell{2},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{4}},
+        Set{Cell{5},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{3},Cell{ },Cell{ }},
+        Set{Cell{ },Cell{2},Cell{ },Cell{ },Cell{9},Cell{ },Cell{ },Cell{6},Cell{ }},
+        Set{Cell{4},Cell{ },Cell{ },Cell{ },Cell{ },Cell{7},Cell{5},Cell{ },Cell{ }},
+    }
+
+    output := input.Solve()
+
+    matchers.AssertThat(t, output.IsSolved(), matchers.IsTrue)
 }
 
 type CellSet Set
