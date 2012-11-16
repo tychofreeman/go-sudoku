@@ -1,7 +1,7 @@
 package sudoku
 
 import (
-    matchers "github.com/tychofreeman/go_matchers"
+    matchers "github.com/tychofreeman/go-matchers"
     "testing"
     "fmt"
 )
