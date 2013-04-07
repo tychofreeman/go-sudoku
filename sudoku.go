@@ -24,21 +24,6 @@ func findMissingValues(set Set) Cell {
     return notFound
 }
 
-/*
-func getPairs(input Set) map[Cell]Cell {
-    
-}
-
-func IsolatePairedDoubles(input Set) Set {
-    pairs := make(map[Cell]Cell)
-    for i := range input {
-        
-    }
-
-    return input
-}
-*/
-
 // For any value which appears in exactly one cell in a set, remove all other values from that cell
 func IsolateSingletons(board Set) Set {
     singletons := make(Cell, len(board) + 1)
@@ -65,6 +50,7 @@ func IsolateSingletons(board Set) Set {
     return board
 }
 
+// Fill out all possible values in a cell
 func Normalize(max int, cell *Cell) {
     for j := 0; j < max; j++ {
         (*cell)[j] = j + 1
