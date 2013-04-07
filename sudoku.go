@@ -186,9 +186,9 @@ func ConstrainSet(set Set) Set {
     return missingValue
 }
 
-func (input Board) GoString() string {
-    maxWidths := make(Cell, len(input))
+func (input Board) DebugString() string {
     out := ""
+    maxWidths := make(Cell, len(input))
     for _, row := range input {
         for col, cell := range row {
             cellWidth := len(fmt.Sprintf("%v", cell))
@@ -209,6 +209,29 @@ func (input Board) GoString() string {
     return out
 }
 
+func (input Board) GoString() string {
+    out := ""
+    for row, cols := range input {
+        for col, cell := range cols {
+            sep := " "
+            if col % 3 == 2 {
+                sep = "|"
+            }
+            if len(cell) == 1 {
+                out += fmt.Sprintf("%d%s", cell[0], sep)
+            } else {
+                out += fmt.Sprintf(" %s", sep)
+            }
+        }
+        if row % 3 == 2 {
+            out += fmt.Sprintf("\n------------------\n")
+        } else {
+            out += "\n"
+        }
+    }
+    return out
+}
+
 func (input Board) IsSolved() bool {
     for _, row := range input {
         for _, cell := range row {
@@ -224,7 +247,7 @@ func (input Board) Solve() (Board) {
     input.Step(ConstrainSet)
     for !input.IsSolved() {
         input = input.Step(ConstrainSet)
-        //fmt.Printf("Board: \n%#v\n", input)
+        fmt.Printf("Board: \n%#v\n", input)
     }
     return input
 }
