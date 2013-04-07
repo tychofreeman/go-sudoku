@@ -411,7 +411,7 @@ func TestSolvesThis(t *testing.T) {
     matchers.AssertThat(t, output, matchers.Equals(expected))
 }
 
-func DISABLE_TestSolvesExtremePuzzle(t *testing.T) {
+func TestSolvesExtremePuzzle(t *testing.T) {
     input := Board{
         Set{Cell{ },Cell{ },Cell{5},Cell{6},Cell{ },Cell{ },Cell{ },Cell{ },Cell{7}},
         Set{Cell{ },Cell{6},Cell{ },Cell{ },Cell{4},Cell{ },Cell{ },Cell{8},Cell{ }},
