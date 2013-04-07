@@ -21,6 +21,16 @@ func (prevCalcd Cell) union(remaining Cell) Cell {
     return remaining
 }
 
+func (c Cell) remove(toRemove int) Cell {
+    c2 := Cell{}
+    for _, v := range c {
+        if v != toRemove {
+            c2 = append(c2, v)
+        }
+    }
+    return c2
+}
+
 func (c Cell) isEmpty() bool {
     return len(c) == 0
 }
