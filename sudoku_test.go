@@ -429,6 +429,24 @@ func TestSolvesExtremePuzzle(t *testing.T) {
     matchers.AssertThat(t, output.IsSolved(), matchers.IsTrue)
 }
 
+func TestInfersConstraintBasedOnMissingPossibilities(t *testing.T) {
+    input := Board{
+        Set{Cell{1,2},Cell{1,3},Cell{4},Cell{1}},
+        Set{Cell{1,4},Cell{1,4},Cell{2},Cell{3}},
+        Set{Cell{1,3},Cell{2,4},Cell{1},Cell{2}},
+        Set{Cell{1,1},Cell{2},Cell{3},Cell{4}},
+    }
+    expected := Board{
+        Set{Cell{2},Cell{1,3},Cell{4},Cell{1}},
+        Set{Cell{4},Cell{1,4},Cell{2},Cell{3}},
+        Set{Cell{1,3},Cell{2,4},Cell{1},Cell{2}},
+        Set{Cell{1,1},Cell{2},Cell{3},Cell{4}},
+    }
+    output := input.Step(ConstrainLinearAndSquare(input))
+
+    matchers.AssertThat(t, output, matchers.Equals(expected))
+}
+
 type CellSet Set
 func (cs CellSet) Equals(other interface{}) (b bool, s string) {
     b = true
@@ -468,40 +486,4 @@ func (cs CellSet) Equals(other interface{}) (b bool, s string) {
     return
 }
 
-/*
-func TestFindsPairs(t *testing.T) {
-    input := Set{
-        Cell{2,3},
-        Cell{1},
-        Cell{2,3},
-        Cell{4,5},
-        Cell{4,5},
-    }
 
-    expected := make(PairMap)
-    expected[[]int{2,3}] = []int{0,2}
-    expected[[]int{4,5}] = []int{3,4}
-
-    output := findPairs(input)
-    matchers.AssertThat(t, output, matchers.Equals(expected))
-}
-
-func TestIsolatesPairedDoubles(t *testing.T) {
-    input := Set{
-        Cell{2,3},
-        Cell{2,3},
-        Cell{1,2,3},
-        Cell{4},
-    }
-    expected := CellSet{
-        Cell{2,3},
-        Cell{2,3},
-        Cell{1},
-        Cell{4},
-    }
-
-    output := IsolatePairedDoubles(input)
-
-    matchers.AssertThat(t, output, matchers.Equals(expected))
-}
-*/
