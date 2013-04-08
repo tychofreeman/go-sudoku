@@ -59,8 +59,8 @@ func HasAllOf(candidate []int, values []int) bool {
 }
 
 func TestNormalizeEmptyBoard(t *testing.T) {
-    input := Set{Cell{}, Cell{}}
-    expected := Set{Cell{1,2}, Cell{1,2}}
+    input := Set{C(), C()}
+    expected := Set{C(1,2), C(1,2)}
 
     actual := NormalizeBoard(input)
 
@@ -81,62 +81,62 @@ func TestZeroSizedBoard(t *testing.T) {
 }
 
 func TestOneSizedBoard(t *testing.T) {
-    oneSized := Set {Cell{1}}
+    oneSized := Set {C(1)}
     result := ConstrainSet(oneSized)
 
     if len(result) != 1 {
         t.Errorf("Length should be 1, but was %v\n", result)
     }
 
-    if !IsExactly(result[0], Cell{1}) {
+    if !IsExactly(result[0], C(1)) {
         t.Errorf("Single value in result should be 1, but was %v\n", result[0])
     }
 }
 
 func TestFindsMissingNumbersInList(t *testing.T) {
-    input := Set {Cell{1}, Cell{}}
+    input := Set {C(1), C()}
     result := ConstrainSet(input)
 
-    if !IsExactly(result[0], Cell{1}) {
+    if !IsExactly(result[0], C(1)) {
         t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[0])
     }
 
-    if !IsExactly(result[1], Cell{2}) {
+    if !IsExactly(result[1], C(2)) {
         t.Errorf("Unknown value was not found. Expected 2, but was %v\n", result[1])
     }
 }
 
 func TestFindsMissingNumbersInList2(t *testing.T) {
-    input := Set {Cell{}, Cell{1}}
+    input := Set {C(), C(1)}
     result := ConstrainSet(input)
 
-    if !IsExactly(result[1], Cell{1}) {
+    if !IsExactly(result[1], C(1)) {
         t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[1])
     }
 
-    if !IsExactly(result[0], Cell{2}) {
+    if !IsExactly(result[0], C(2)) {
         t.Errorf("Unknown value was not found. Expected 2, but was %v\n", result[0])
     }
 }
 
 func TestFindsMissingNumberInSize3List(t *testing.T) {
-    input := Set {Cell{1}, Cell{2}, Cell{}}
+    input := Set {C(1), C(2), C()}
     result := ConstrainSet(input)
-    if !IsExactly(result[0], Cell{1}) || !IsExactly(result[1], Cell{2}) {
+    if !IsExactly(result[0], C(1)) || !IsExactly(result[1], C(2)) {
         t.Errorf("Known values should not be changed.\n")
     }
 
-    if !IsExactly(result[2], Cell{3}) {
+    if !IsExactly(result[2], C(3)) {
         t.Errorf("Unkonwn value was not found. Expected 3, but was %v\n", result[2])
     }
 
 }
 
 func TestFindsMultipleMissingNumbersInLongerList(t *testing.T) {
-    input := Set {Cell{1}, Cell{}, Cell{}}
+    input := Set {C(1), C(), C()}
     result := ConstrainSet(input)
 
-    if !IsExactly(result[0], Cell{1}) {
+    if !IsExactly(result[0], C(1)) {
         t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[0])
     }
 
@@ -149,10 +149,10 @@ func TestFindsMultipleMissingNumbersInLongerList(t *testing.T) {
 }
 
 func TestReducesMissingNumbersIfNumIsPresent(t *testing.T) {
-    input := Set {Cell{1}, Cell{2,1,3}, Cell{2,1,3}}
+    input := Set {C(1), C(2,1,3), C(2,1,3)}
     result := ConstrainSet(input)
 
-    if !IsExactly(result[0], Cell{1}) {
+    if !IsExactly(result[0], C(1)) {
         t.Errorf("Known value should not be changed. Expected 1, but was %v\n", result[0])
     }
 
@@ -165,35 +165,35 @@ func TestReducesMissingNumbersIfNumIsPresent(t *testing.T) {
 }
 
 func TestDoesNotIntroduceNewNumbers(t *testing.T) {
-    input := Set {Cell{1}, Cell{2,3}, Cell{2,3,4}, Cell{2,3,4}}
+    input := Set {C(1), C(2,3), C(2,3,4), C(2,3,4)}
     result := ConstrainSet(input)
-    if !IsExactly(result[1], Cell{2,3}) {
-        t.Errorf("Added some new numbers when it should not have. Expected Cell{2,3}, but was %v\n", result[1])
+    if !IsExactly(result[1], C(2,3)) {
+        t.Errorf("Added some new numbers when it should not have. Expected C(2,3), but was %v\n", result[1])
     }
 }
 
 func TestIsolatesANumberWhichOnlyAppearsOnce(t *testing.T) {
-    input := Set{Cell{1,2}, Cell{1,2}, Cell{1,2,3}}
+    input := Set{C(1,2), C(1,2), C(1,2,3)}
     result := ConstrainSet(input)
-    if !IsExactly(result[2], Cell{3}) {
+    if !IsExactly(result[2], C(3)) {
         t.Errorf("A number which appears exactly once should be the only possible number for that cell. Expected [3], but got %v\n", result[2])
     }
 }
 
 func TestIsolatesANumberWhichOnlyAppearsOnceAndDoesNotFallForStupidTricks(t *testing.T) {
-    input := Set{Cell{1,2}, Cell{1,2}, Cell{1,2,3}, Cell{}}
+    input := Set{C(1,2), C(1,2), C(1,2,3), C()}
     result := ConstrainSet(input)
-    if IsExactly(result[2], Cell{3}) {
+    if IsExactly(result[2], C(3)) {
         t.Errorf("An empty cell should be replaced with all possible missing values.")
     }
 }
 
 func TestDegenerateCoords3By3MapTo1By1Squares(t *testing.T) {
     data := Set{
-        Cell{0,0,0,0},
-        Cell{0,1,0,0},
-        Cell{1,0,0,0},
-        Cell{2,2,0,0},
+        C(0,0,0,0),
+        C(0,1,0,0),
+        C(1,0,0,0),
+        C(2,2,0,0),
     }
 
     f := coordsMapForBoardOfLength(3)
@@ -207,21 +207,21 @@ func TestDegenerateCoords3By3MapTo1By1Squares(t *testing.T) {
 
 func TestCoords9By9MapTo3By3Squares(t *testing.T) {
     data := Set{
-        Cell{0,0,0,0},
-        Cell{1,0,0,3},
-        Cell{1,1,0,4},
-        Cell{2,2,0,8},
-        Cell{0,6,2,0},
-        Cell{0,7,2,1},
-        Cell{0,8,2,2},
-        Cell{1,6,2,3},
-        Cell{2,6,2,6},
-        Cell{3,0,3,0},
-        Cell{3,2,3,2},
-        Cell{4,0,3,3},
-        Cell{3,6,5,0},
-        Cell{4,6,5,3},
-        Cell{5,8,5,8},
+        C(0,0,0,0),
+        C(1,0,0,3),
+        C(1,1,0,4),
+        C(2,2,0,8),
+        C(0,6,2,0),
+        C(0,7,2,1),
+        C(0,8,2,2),
+        C(1,6,2,3),
+        C(2,6,2,6),
+        C(3,0,3,0),
+        C(3,2,3,2),
+        C(4,0,3,3),
+        C(3,6,5,0),
+        C(4,6,5,3),
+        C(5,8,5,8),
     }
 
     f := coordsMapForBoardOfLength(9)
@@ -235,27 +235,27 @@ func TestCoords9By9MapTo3By3Squares(t *testing.T) {
 
 func _TestSauaresOf81CellBoardAre3X3Nondrants(t *testing.T) {
     input := Board{
-        Set{Cell{1},Cell{1},Cell{1},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2}},
-        Set{Cell{1},Cell{1},Cell{1},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2}},
-        Set{Cell{1},Cell{1},Cell{1},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2}},
-        Set{Cell{4},Cell{4},Cell{4},Cell{5},Cell{5},Cell{5},Cell{6},Cell{6},Cell{6}},
-        Set{Cell{4},Cell{4},Cell{4},Cell{5},Cell{5},Cell{5},Cell{6},Cell{6},Cell{6}},
-        Set{Cell{4},Cell{4},Cell{4},Cell{5},Cell{5},Cell{5},Cell{6},Cell{6},Cell{6}},
-        Set{Cell{7},Cell{7},Cell{7},Cell{8},Cell{8},Cell{8},Cell{9},Cell{9},Cell{9}},
-        Set{Cell{7},Cell{7},Cell{7},Cell{8},Cell{8},Cell{8},Cell{9},Cell{9},Cell{9}},
-        Set{Cell{7},Cell{7},Cell{7},Cell{8},Cell{8},Cell{8},Cell{9},Cell{9},Cell{9}},
+        Set{C(1),C(1),C(1),C(2),C(2),C(2),C(2),C(2),C(2)},
+        Set{C(1),C(1),C(1),C(2),C(2),C(2),C(2),C(2),C(2)},
+        Set{C(1),C(1),C(1),C(2),C(2),C(2),C(2),C(2),C(2)},
+        Set{C(4),C(4),C(4),C(5),C(5),C(5),C(6),C(6),C(6)},
+        Set{C(4),C(4),C(4),C(5),C(5),C(5),C(6),C(6),C(6)},
+        Set{C(4),C(4),C(4),C(5),C(5),C(5),C(6),C(6),C(6)},
+        Set{C(7),C(7),C(7),C(8),C(8),C(8),C(9),C(9),C(9)},
+        Set{C(7),C(7),C(7),C(8),C(8),C(8),C(9),C(9),C(9)},
+        Set{C(7),C(7),C(7),C(8),C(8),C(8),C(9),C(9),C(9)},
     }
 
     expected := Board{
-        Set{Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},Cell{1},},
-        Set{Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},Cell{2},},
-        Set{Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},Cell{3},},
-        Set{Cell{4},Cell{4},Cell{4},Cell{4},Cell{4},Cell{4},Cell{4},Cell{4},Cell{4},},
-        Set{Cell{5},Cell{5},Cell{5},Cell{5},Cell{5},Cell{5},Cell{5},Cell{5},Cell{5},},
-        Set{Cell{6},Cell{6},Cell{6},Cell{6},Cell{6},Cell{6},Cell{6},Cell{6},Cell{6},},
-        Set{Cell{7},Cell{7},Cell{7},Cell{7},Cell{7},Cell{7},Cell{7},Cell{7},Cell{7},},
-        Set{Cell{8},Cell{8},Cell{8},Cell{8},Cell{8},Cell{8},Cell{8},Cell{8},Cell{8},},
-        Set{Cell{9},Cell{9},Cell{9},Cell{9},Cell{9},Cell{9},Cell{9},Cell{9},Cell{9},},
+        Set{C(1),C(1),C(1),C(1),C(1),C(1),C(1),C(1),C(1),},
+        Set{C(2),C(2),C(2),C(2),C(2),C(2),C(2),C(2),C(2),},
+        Set{C(3),C(3),C(3),C(3),C(3),C(3),C(3),C(3),C(3),},
+        Set{C(4),C(4),C(4),C(4),C(4),C(4),C(4),C(4),C(4),},
+        Set{C(5),C(5),C(5),C(5),C(5),C(5),C(5),C(5),C(5),},
+        Set{C(6),C(6),C(6),C(6),C(6),C(6),C(6),C(6),C(6),},
+        Set{C(7),C(7),C(7),C(7),C(7),C(7),C(7),C(7),C(7),},
+        Set{C(8),C(8),C(8),C(8),C(8),C(8),C(8),C(8),C(8),},
+        Set{C(9),C(9),C(9),C(9),C(9),C(9),C(9),C(9),C(9),},
     }
 
     validateSameCells(t, expected, squaresOf(input))
@@ -263,22 +263,22 @@ func _TestSauaresOf81CellBoardAre3X3Nondrants(t *testing.T) {
 
 func TestColumnsOf(t *testing.T) {
     input := Board{
-            Set{Cell{1},Cell{2},Cell{3}},
-            Set{Cell{1},Cell{2},Cell{3}},
-            Set{Cell{1},Cell{2},Cell{3}},
+            Set{C(1),C(2),C(3)},
+            Set{C(1),C(2),C(3)},
+            Set{C(1),C(2),C(3)},
             }
 
     expected := Board{
-            Set{Cell{1},Cell{1},Cell{1}},
-            Set{Cell{2},Cell{2},Cell{2}},
-            Set{Cell{3},Cell{3},Cell{3}},
+            Set{C(1),C(1),C(1)},
+            Set{C(2),C(2),C(2)},
+            Set{C(3),C(3),C(3)},
             }
     validateSameCells(t, expected, columnsOf(input))
 }
 
 func TestCallsFunction(t *testing.T) {
     wasCalled := false
-    input := Board{Set{Cell{1}}}
+    input := Board{Set{C(1)}}
     input.Step(func(board Set) Set { wasCalled = true; return Set{};  })
     if !wasCalled {
         t.Errorf("Expected function to be called by Step(), but was not.")
@@ -287,7 +287,7 @@ func TestCallsFunction(t *testing.T) {
 
 func TestCallsFunctionOnRows(t *testing.T) {
     rows := Board{}
-    input := Board{Set{Cell{1},Cell{2},Cell{3}}, Set{Cell{1},Cell{2},Cell{3}}, Set{Cell{1},Cell{2},Cell{3}},
+    input := Board{Set{C(1),C(2),C(3)}, Set{C(1),C(2),C(3)}, Set{C(1),C(2),C(3)},
                        Set{}, Set{}, Set{},
                        Set{}, Set{}, Set{}}
 
@@ -302,15 +302,15 @@ func TestCallsFunctionOnRows(t *testing.T) {
 func TestCallsFunctionOnCols(t *testing.T) {
     cols := Board{}
     input := Board{
-                Set{Cell{1},Cell{2},Cell{6}},
-                Set{Cell{4},Cell{5},Cell{8}},
-                Set{Cell{3},Cell{9},Cell{7}},
+                Set{C(1),C(2),C(6)},
+                Set{C(4),C(5),C(8)},
+                Set{C(3),C(9),C(7)},
             }
 
     expected := Board{
-        Set{Cell{1},Cell{4},Cell{3}},
-        Set{Cell{2},Cell{5},Cell{9}},
-        Set{Cell{6},Cell{8},Cell{7}},
+        Set{C(1),C(4),C(3)},
+        Set{C(2),C(5),C(9)},
+        Set{C(6),C(8),C(7)},
     }
 
     input.Step(func(board Set) Set {
@@ -324,27 +324,27 @@ func TestCallsFunctionOnCols(t *testing.T) {
 func TestCallsFunctionOnSquares(t *testing.T) {
     squares := Board{}
     input := Board{
-        Set{Cell{1},Cell{2},Cell{3},Cell{4},Cell{5},Cell{6},Cell{7},Cell{8},Cell{9}},
-        Set{Cell{9},Cell{1},Cell{2},Cell{3},Cell{4},Cell{5},Cell{6},Cell{7},Cell{8}},
-        Set{Cell{8},Cell{9},Cell{1},Cell{2},Cell{3},Cell{4},Cell{5},Cell{6},Cell{7}},
-        Set{Cell{7},Cell{8},Cell{9},Cell{1},Cell{2},Cell{3},Cell{4},Cell{5},Cell{6}},
-        Set{Cell{6},Cell{7},Cell{8},Cell{9},Cell{1},Cell{2},Cell{3},Cell{4},Cell{5}},
-        Set{Cell{5},Cell{6},Cell{7},Cell{8},Cell{9},Cell{1},Cell{2},Cell{3},Cell{4}},
-        Set{Cell{4},Cell{5},Cell{6},Cell{7},Cell{8},Cell{9},Cell{1},Cell{2},Cell{3}},
-        Set{Cell{3},Cell{4},Cell{5},Cell{6},Cell{7},Cell{8},Cell{9},Cell{1},Cell{2}},
-        Set{Cell{2},Cell{3},Cell{4},Cell{5},Cell{6},Cell{7},Cell{8},Cell{9},Cell{1}},
+        Set{C(1),C(2),C(3),C(4),C(5),C(6),C(7),C(8),C(9)},
+        Set{C(9),C(1),C(2),C(3),C(4),C(5),C(6),C(7),C(8)},
+        Set{C(8),C(9),C(1),C(2),C(3),C(4),C(5),C(6),C(7)},
+        Set{C(7),C(8),C(9),C(1),C(2),C(3),C(4),C(5),C(6)},
+        Set{C(6),C(7),C(8),C(9),C(1),C(2),C(3),C(4),C(5)},
+        Set{C(5),C(6),C(7),C(8),C(9),C(1),C(2),C(3),C(4)},
+        Set{C(4),C(5),C(6),C(7),C(8),C(9),C(1),C(2),C(3)},
+        Set{C(3),C(4),C(5),C(6),C(7),C(8),C(9),C(1),C(2)},
+        Set{C(2),C(3),C(4),C(5),C(6),C(7),C(8),C(9),C(1)},
     }
 
     expected := Board{
-        Set{Cell{1},Cell{2},Cell{3},Cell{9},Cell{1},Cell{2},Cell{8},Cell{9},Cell{1}},
-        Set{Cell{4},Cell{5},Cell{6},Cell{3},Cell{4},Cell{5},Cell{2},Cell{3},Cell{4}},
-        Set{Cell{7},Cell{8},Cell{9},Cell{6},Cell{7},Cell{8},Cell{5},Cell{6},Cell{7}},
-        Set{Cell{7},Cell{8},Cell{9},Cell{6},Cell{7},Cell{8},Cell{5},Cell{6},Cell{7}},
-        Set{Cell{1},Cell{2},Cell{3},Cell{9},Cell{1},Cell{2},Cell{8},Cell{9},Cell{1}},
-        Set{Cell{4},Cell{5},Cell{6},Cell{3},Cell{4},Cell{5},Cell{2},Cell{3},Cell{4}},
-        Set{Cell{4},Cell{5},Cell{6},Cell{3},Cell{4},Cell{5},Cell{2},Cell{3},Cell{4}},
-        Set{Cell{7},Cell{8},Cell{9},Cell{6},Cell{7},Cell{8},Cell{5},Cell{6},Cell{7}},
-        Set{Cell{1},Cell{2},Cell{3},Cell{9},Cell{1},Cell{2},Cell{8},Cell{9},Cell{1}},
+        Set{C(1),C(2),C(3),C(9),C(1),C(2),C(8),C(9),C(1)},
+        Set{C(4),C(5),C(6),C(3),C(4),C(5),C(2),C(3),C(4)},
+        Set{C(7),C(8),C(9),C(6),C(7),C(8),C(5),C(6),C(7)},
+        Set{C(7),C(8),C(9),C(6),C(7),C(8),C(5),C(6),C(7)},
+        Set{C(1),C(2),C(3),C(9),C(1),C(2),C(8),C(9),C(1)},
+        Set{C(4),C(5),C(6),C(3),C(4),C(5),C(2),C(3),C(4)},
+        Set{C(4),C(5),C(6),C(3),C(4),C(5),C(2),C(3),C(4)},
+        Set{C(7),C(8),C(9),C(6),C(7),C(8),C(5),C(6),C(7)},
+        Set{C(1),C(2),C(3),C(9),C(1),C(2),C(8),C(9),C(1)},
     }
 
     input.Step(func(board Set) Set {
@@ -356,26 +356,26 @@ func TestCallsFunctionOnSquares(t *testing.T) {
 }
 
 var unsolved Board = Board{
-    Set{Cell{ },Cell{1},Cell{ },Cell{6},Cell{ },Cell{7},Cell{ },Cell{ },Cell{4}},
-    Set{Cell{ },Cell{4},Cell{2},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{ }},
-    Set{Cell{8},Cell{7},Cell{ },Cell{3},Cell{ },Cell{ },Cell{6},Cell{ },Cell{ }},
-    Set{Cell{ },Cell{8},Cell{ },Cell{ },Cell{7},Cell{ },Cell{ },Cell{2},Cell{ }},
-    Set{Cell{ },Cell{ },Cell{ },Cell{8},Cell{9},Cell{3},Cell{ },Cell{ },Cell{ }},
-    Set{Cell{ },Cell{3},Cell{ },Cell{ },Cell{6},Cell{ },Cell{ },Cell{1},Cell{ }},
-    Set{Cell{ },Cell{ },Cell{8},Cell{ },Cell{ },Cell{6},Cell{ },Cell{4},Cell{5}},
-    Set{Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{1},Cell{7},Cell{ }},
-    Set{Cell{4},Cell{ },Cell{ },Cell{9},Cell{ },Cell{8},Cell{ },Cell{6},Cell{ }},
+    Set{C( ),C(1),C( ),C(6),C( ),C(7),C( ),C( ),C(4)},
+    Set{C( ),C(4),C(2),C( ),C( ),C( ),C( ),C( ),C( )},
+    Set{C(8),C(7),C( ),C(3),C( ),C( ),C(6),C( ),C( )},
+    Set{C( ),C(8),C( ),C( ),C(7),C( ),C( ),C(2),C( )},
+    Set{C( ),C( ),C( ),C(8),C(9),C(3),C( ),C( ),C( )},
+    Set{C( ),C(3),C( ),C( ),C(6),C( ),C( ),C(1),C( )},
+    Set{C( ),C( ),C(8),C( ),C( ),C(6),C( ),C(4),C(5)},
+    Set{C( ),C( ),C( ),C( ),C( ),C( ),C(1),C(7),C( )},
+    Set{C(4),C( ),C( ),C(9),C( ),C(8),C( ),C(6),C( )},
 }
 var solved Board = Board{
-    Set{Cell{9},Cell{1},Cell{3},Cell{6},Cell{2},Cell{7},Cell{5},Cell{8},Cell{4}},
-    Set{Cell{6},Cell{4},Cell{2},Cell{5},Cell{8},Cell{9},Cell{7},Cell{3},Cell{1}},
-    Set{Cell{8},Cell{7},Cell{5},Cell{3},Cell{4},Cell{1},Cell{6},Cell{9},Cell{2}},
-    Set{Cell{5},Cell{8},Cell{9},Cell{1},Cell{7},Cell{4},Cell{3},Cell{2},Cell{6}},
-    Set{Cell{2},Cell{6},Cell{1},Cell{8},Cell{9},Cell{3},Cell{4},Cell{5},Cell{7}},
-    Set{Cell{7},Cell{3},Cell{4},Cell{2},Cell{6},Cell{5},Cell{8},Cell{1},Cell{9}},
-    Set{Cell{1},Cell{2},Cell{8},Cell{7},Cell{3},Cell{6},Cell{9},Cell{4},Cell{5}},
-    Set{Cell{3},Cell{9},Cell{6},Cell{4},Cell{5},Cell{2},Cell{1},Cell{7},Cell{8}},
-    Set{Cell{4},Cell{5},Cell{7},Cell{9},Cell{1},Cell{8},Cell{2},Cell{6},Cell{3}},
+    Set{C(9),C(1),C(3),C(6),C(2),C(7),C(5),C(8),C(4)},
+    Set{C(6),C(4),C(2),C(5),C(8),C(9),C(7),C(3),C(1)},
+    Set{C(8),C(7),C(5),C(3),C(4),C(1),C(6),C(9),C(2)},
+    Set{C(5),C(8),C(9),C(1),C(7),C(4),C(3),C(2),C(6)},
+    Set{C(2),C(6),C(1),C(8),C(9),C(3),C(4),C(5),C(7)},
+    Set{C(7),C(3),C(4),C(2),C(6),C(5),C(8),C(1),C(9)},
+    Set{C(1),C(2),C(8),C(7),C(3),C(6),C(9),C(4),C(5)},
+    Set{C(3),C(9),C(6),C(4),C(5),C(2),C(1),C(7),C(8)},
+    Set{C(4),C(5),C(7),C(9),C(1),C(8),C(2),C(6),C(3)},
 }
 
 func TestStepThroughIt(t *testing.T) {
@@ -384,27 +384,27 @@ func TestStepThroughIt(t *testing.T) {
 
 func TestSolvesThis(t *testing.T) {
     input := Board{
-        Set{Cell{ },Cell{1},Cell{ },Cell{6},Cell{ },Cell{7},Cell{ },Cell{ },Cell{4}},
-        Set{Cell{ },Cell{4},Cell{2},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{ }},
-        Set{Cell{8},Cell{7},Cell{ },Cell{3},Cell{ },Cell{ },Cell{6},Cell{ },Cell{ }},
-        Set{Cell{ },Cell{8},Cell{ },Cell{ },Cell{7},Cell{ },Cell{ },Cell{2},Cell{ }},
-        Set{Cell{ },Cell{ },Cell{ },Cell{8},Cell{9},Cell{3},Cell{ },Cell{ },Cell{ }},
-        Set{Cell{ },Cell{3},Cell{ },Cell{ },Cell{6},Cell{ },Cell{ },Cell{1},Cell{ }},
-        Set{Cell{ },Cell{ },Cell{8},Cell{ },Cell{ },Cell{6},Cell{ },Cell{4},Cell{5}},
-        Set{Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{1},Cell{7},Cell{ }},
-        Set{Cell{4},Cell{ },Cell{ },Cell{9},Cell{ },Cell{8},Cell{ },Cell{6},Cell{ }},
+        Set{C( ),C(1),C( ),C(6),C( ),C(7),C( ),C( ),C(4)},
+        Set{C( ),C(4),C(2),C( ),C( ),C( ),C( ),C( ),C( )},
+        Set{C(8),C(7),C( ),C(3),C( ),C( ),C(6),C( ),C( )},
+        Set{C( ),C(8),C( ),C( ),C(7),C( ),C( ),C(2),C( )},
+        Set{C( ),C( ),C( ),C(8),C(9),C(3),C( ),C( ),C( )},
+        Set{C( ),C(3),C( ),C( ),C(6),C( ),C( ),C(1),C( )},
+        Set{C( ),C( ),C(8),C( ),C( ),C(6),C( ),C(4),C(5)},
+        Set{C( ),C( ),C( ),C( ),C( ),C( ),C(1),C(7),C( )},
+        Set{C(4),C( ),C( ),C(9),C( ),C(8),C( ),C(6),C( )},
     }
 
     expected := Board{
-        Set{Cell{9},Cell{1},Cell{3},Cell{6},Cell{2},Cell{7},Cell{5},Cell{8},Cell{4}},
-        Set{Cell{6},Cell{4},Cell{2},Cell{5},Cell{8},Cell{9},Cell{7},Cell{3},Cell{1}},
-        Set{Cell{8},Cell{7},Cell{5},Cell{3},Cell{4},Cell{1},Cell{6},Cell{9},Cell{2}},
-        Set{Cell{5},Cell{8},Cell{9},Cell{1},Cell{7},Cell{4},Cell{3},Cell{2},Cell{6}},
-        Set{Cell{2},Cell{6},Cell{1},Cell{8},Cell{9},Cell{3},Cell{4},Cell{5},Cell{7}},
-        Set{Cell{7},Cell{3},Cell{4},Cell{2},Cell{6},Cell{5},Cell{8},Cell{1},Cell{9}},
-        Set{Cell{1},Cell{2},Cell{8},Cell{7},Cell{3},Cell{6},Cell{9},Cell{4},Cell{5}},
-        Set{Cell{3},Cell{9},Cell{6},Cell{4},Cell{5},Cell{2},Cell{1},Cell{7},Cell{8}},
-        Set{Cell{4},Cell{5},Cell{7},Cell{9},Cell{1},Cell{8},Cell{2},Cell{6},Cell{3}},
+        Set{C(9),C(1),C(3),C(6),C(2),C(7),C(5),C(8),C(4)},
+        Set{C(6),C(4),C(2),C(5),C(8),C(9),C(7),C(3),C(1)},
+        Set{C(8),C(7),C(5),C(3),C(4),C(1),C(6),C(9),C(2)},
+        Set{C(5),C(8),C(9),C(1),C(7),C(4),C(3),C(2),C(6)},
+        Set{C(2),C(6),C(1),C(8),C(9),C(3),C(4),C(5),C(7)},
+        Set{C(7),C(3),C(4),C(2),C(6),C(5),C(8),C(1),C(9)},
+        Set{C(1),C(2),C(8),C(7),C(3),C(6),C(9),C(4),C(5)},
+        Set{C(3),C(9),C(6),C(4),C(5),C(2),C(1),C(7),C(8)},
+        Set{C(4),C(5),C(7),C(9),C(1),C(8),C(2),C(6),C(3)},
     }
     output := input.Solve()
 
@@ -413,15 +413,15 @@ func TestSolvesThis(t *testing.T) {
 
 func DISABLED_TestSolvesExtremePuzzle(t *testing.T) {
     input := Board{
-        Set{Cell{ },Cell{ },Cell{5},Cell{6},Cell{ },Cell{ },Cell{ },Cell{ },Cell{7}},
-        Set{Cell{ },Cell{6},Cell{ },Cell{ },Cell{4},Cell{ },Cell{ },Cell{8},Cell{ }},
-        Set{Cell{ },Cell{ },Cell{9},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{1}},
-        Set{Cell{7},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{1},Cell{ },Cell{ }},
-        Set{Cell{ },Cell{8},Cell{ },Cell{ },Cell{1},Cell{ },Cell{ },Cell{2},Cell{ }},
-        Set{Cell{ },Cell{ },Cell{2},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{4}},
-        Set{Cell{5},Cell{ },Cell{ },Cell{ },Cell{ },Cell{ },Cell{3},Cell{ },Cell{ }},
-        Set{Cell{ },Cell{2},Cell{ },Cell{ },Cell{9},Cell{ },Cell{ },Cell{6},Cell{ }},
-        Set{Cell{4},Cell{ },Cell{ },Cell{ },Cell{ },Cell{7},Cell{5},Cell{ },Cell{ }},
+        Set{C( ),C( ),C(5),C(6),C( ),C( ),C( ),C( ),C(7)},
+        Set{C( ),C(6),C( ),C( ),C(4),C( ),C( ),C(8),C( )},
+        Set{C( ),C( ),C(9),C( ),C( ),C( ),C( ),C( ),C(1)},
+        Set{C(7),C( ),C( ),C( ),C( ),C( ),C(1),C( ),C( )},
+        Set{C( ),C(8),C( ),C( ),C(1),C( ),C( ),C(2),C( )},
+        Set{C( ),C( ),C(2),C( ),C( ),C( ),C( ),C( ),C(4)},
+        Set{C(5),C( ),C( ),C( ),C( ),C( ),C(3),C( ),C( )},
+        Set{C( ),C(2),C( ),C( ),C(9),C( ),C( ),C(6),C( )},
+        Set{C(4),C( ),C( ),C( ),C( ),C(7),C(5),C( ),C( )},
     }
 
     output := input.Solve()
@@ -429,23 +429,15 @@ func DISABLED_TestSolvesExtremePuzzle(t *testing.T) {
     matchers.AssertThat(t, output.IsSolved(), matchers.IsTrue)
 }
 
-func ConstrainLinearAndSquare(input []Set, intersection []*Cell) []Set {
-    constrained := 1
-
-    input[0][0] = input[0][0].remove(constrained)
-    input[0][1] = input[0][1].remove(constrained)
-    return input
-}
-
-func TestInfersConstraintBasedOnMissingPossibilities(t *testing.T) {
+func TestRemoves1sFromRestOfSquareWhenASubsetMustContainThem(t *testing.T) {
     input := []Set{
-        Set{Cell{1,2},Cell{1,3},Cell{1,4},Cell{1,4}},
-        Set{Cell{1,4},Cell{1,4},Cell{2},Cell{3}},
+        Set{C(1,2),C(1,3),C(1,4),C(1,4)},
+        Set{C(1,4),C(1,4),C(2  ),C(3  )},
     }
-    intersect := []*Cell{&input[0][0], &input[0][1]}
+    intersect := []int{2,3}
     expected := []Set{
-        Set{Cell{2},Cell{3},Cell{1,4},Cell{1,4}},
-        Set{Cell{1,4},Cell{1,4},Cell{2},Cell{3}},
+        Set{C(2  ),C(3  ),C(1,4),C(1,4)},
+        Set{C(1,4),C(1,4),C(2  ),C(3  )},
     }
 
     output := ConstrainLinearAndSquare(input, intersect)

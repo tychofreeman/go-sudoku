@@ -24,6 +24,61 @@ func findMissingValues(set Set) Cell {
     return notFound
 }
 
+// This gets rewritten when Cell is rewritten as bit-values on an int
+func oneOffsetComplementOf(orig []int, max int) []int {
+    compl := []int{}
+    for i := 1; i <= max; i++ {
+        found := false
+        for _, v := range orig {
+            if i == v {
+                found = true
+            }
+        }
+        if !found {
+            compl = append(compl, i)
+        }
+    }
+    return compl
+}
+
+func zeroOffsetComplementOf(orig []int, max int) []int {
+    compl := []int{}
+    for i := 0; i < max; i++ {
+        for _, v := range orig {
+            if i != v {
+                compl = append(compl, i)
+            }
+        }
+    }
+    return compl
+}
+
+func constrainForSet(s Set, indexesInComplement []int, constrained int) Set {
+    for _, index := range indexesInComplement {
+        s[index] = s[index].remove(constrained)
+    }
+    return s
+}
+
+func findMissingFor(input Set, onlyIn []int) []int {
+    max := len(input)
+    found := C()
+    for _, v := range onlyIn {
+        found = found.union(input[v])
+    }
+    missing := oneOffsetComplementOf(found, max)
+    return missing
+}
+
+func ConstrainLinearAndSquare(input []Set, intersection []int) []Set {
+    indexesInComplement := zeroOffsetComplementOf(intersection, len(input))
+    constraineds := findMissingFor(input[1], intersection)
+    for _, constrained := range constraineds {
+        input[0] = constrainForSet(input[0], indexesInComplement, constrained)
+    }
+    return input
+}
+
 // For any value which appears in exactly one cell in a set, remove all other values from that cell
 func IsolateSingletons(board Set) Set {
     singletons := make(Cell, len(board) + 1)
@@ -177,7 +232,7 @@ func ConstrainSet(set Set) Set {
         if len(cell) == 0 {
             missingValue[i] = notFound
         } else if len(cell) != 1 {
-            missingValue[i] = cell.union(notFound)
+            missingValue[i] = cell.intersection(notFound)
         } else {
             missingValue[i] = cell
         }
