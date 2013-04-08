@@ -1,0 +1,11 @@
+Learned much from doing this exercise.
+
+First, that set operations on ints are probably best done on bit-fields, instead of arrays of int values.
+
+Second, that the constraints are applied between two intersecting sets of int values.
+
+I will probably scrap this and restart.
+
+Sadly, I didn't refactor at all during this exercise, so it isn't TDD. #TDDFail.
+
+Ah well.
