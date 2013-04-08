@@ -222,6 +222,7 @@ func (board Board) Step(filter func(Set) Set) (Board) {
 func ConstrainSet(set Set) Set {
     set = NormalizeBoard(set)
     set = IsolateSingletons(set)
+
     // Isolate any missing values
 
     notFound := findMissingValues(set)
